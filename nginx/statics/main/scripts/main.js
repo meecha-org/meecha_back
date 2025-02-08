@@ -38,11 +38,12 @@ async function TestJwt() {
     console.log(authData["token"]);
 
     const req = await fetch("/auth/jwt",{
-        method: "POST",
+        method: "GET",
         headers : {
             "Authorization" : authData["token"],
         }
     })
 
-    console.log(await req.json());
+    const payload = await req.json();
+    console.log(payload["result"]);
 }

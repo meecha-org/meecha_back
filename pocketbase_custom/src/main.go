@@ -32,6 +32,10 @@ type UserInfo struct {
 }
 
 func main() {
+	RunServer()
+}
+
+func RunServer() {
 	app := pocketbase.New()
 
 	// ユーザー認証
@@ -86,6 +90,44 @@ func main() {
 
 			return evt.JSON(http.StatusOK, map[string]UserData{"result": return_data})
 			
+		}).Bind(apis.RequireAuth("users"))
+
+		// jwt を発行する関数
+		evt.Router.GET("/jwt", func(evt *core.RequestEvent) error {
+			// ユーザー取得
+			info, err := evt.RequestInfo()
+
+			// エラー処理
+			if err != nil {
+				app.Logger().Error("error",err)
+				return evt.Error(http.StatusInternalServerError, "something went wrong", map[string]validation.Error{
+					"title": validation.NewError("message", "failed to get auth"),
+				})
+			}
+
+			authRecord := info.Auth
+			
+			// ラベルのIDを取得する
+			labels := authRecord.Get("labels").([]string)
+
+			// ラベルの文字列取得
+			return_labels := GetLabels(app,labels)
+
+			// トークンを生成する
+			token,err := GenJwt(JwtPayload{
+				UserID: authRecord.Id,
+				Labels: return_labels,
+			})
+
+			// エラー処理
+			if err != nil {
+				app.Logger().Error("error",err)
+				return evt.Error(http.StatusInternalServerError, "something went wrong", map[string]validation.Error{
+					"title": validation.NewError("message", "failed to generate token"),
+				})
+			}
+
+			return evt.JSON(http.StatusOK, map[string]string{"result": token})
 		}).Bind(apis.RequireAuth("users"))
 
 		evt.Router.GET("/icon/{userid}",func(evt *core.RequestEvent) error {

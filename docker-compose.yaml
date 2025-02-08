@@ -13,12 +13,15 @@ services:
     pocketbasec:
         build:
             context: ./pocketbase_custom
+            # target: Develop
         hostname: pocketbasec
         restart: always
         volumes:
             - ./pocketbase_custom/pbdata:/pocketbase/pb_data
+            - ./pocketbase_custom/src:/root/pocketbase
         environment:
             - AUTHROOT=https://dev-meecha.mattuu.com/auth/
+        tty: true
     redis:
         hostname: redis
         image: redis:latest
@@ -33,4 +36,5 @@ services:
         restart: always
         volumes:
             - ./app/src:/root/src
+            - ./pocketbase_custom/pbdata/public_key.pem:/root/src/public_key.pem
         tty: true
