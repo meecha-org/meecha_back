@@ -1,0 +1,10 @@
+pocketbase_custom/pbdata/
+*.db
+nginx/keys/
+databases/
+pocketbase_custom/pbdata/
+.DS_Store
+pocketbase_custom/src/pb_data/
+.env
+pocketbase_custom/src/vendor/
+*__debug_bin*

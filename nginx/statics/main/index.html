@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ログイン済み</title>
+</head>
+<body>
+    <h1>ログイン済みです</h1>
+
+    <div>
+        <h2>ユーザーアイコン</h2>
+        <img src="" id="usericon" alt="">
+    </div>
+
+    <button onclick="TestJwt()">JWTテスト</button>
+    <button onclick="DoLogout()">ログアウト</button>
+
+    <!-- pocketbase のメイン -->
+    <script src="/statics/auth/scripts/pocketbase.umd.js"></script>
+    <!-- 認証Sdk -->
+    <script src="/statics/auth/scripts/authsdk.js"></script>
+    <!-- 各種設定 -->
+    <script src="/statics/config.js"></script>
+    
+    <script src="./scripts/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+FROM golang:1.23.3-bookworm as Develop
+
+# 作業フォルダ指定
+WORKDIR /root/pocketbase
+
+# apt 更新
+RUN apt update
+
+# ビルド環境
+FROM golang:1.23.3-bookworm as Build
+
+# apt 更新
+RUN apt update
+
+# 作業フォルダ指定
+WORKDIR /root/pocketbase
+
+# ソースをコピー
+COPY ./src .
+
+# モジュールをダウンロード
+RUN go mod download
+ARG GOOS=linux
+ARG GOARCH=amd64
+# ビルド成果物にデバック情報が含まれないようにする
+RUN go build -ldflags '-s -w' -o ./server
+
+
+# 実行する環境
+FROM debian:bookworm-slim as runner
+
+# TLS のためのパッケージ
+RUN apt update
+RUN apt install -y ca-certificates openssl
+
+# 作業フォルダ指定
+WORKDIR /pocketbase
+
+# ビルド感情からコピー
+COPY --from=Build /root/pocketbase/server .
+ENTRYPOINT ["./server","serve", "--http=0.0.0.0:8080"]

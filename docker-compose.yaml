@@ -1,0 +1,36 @@
+services:
+    nginx:
+        hostname: nginx
+        image: nginx:latest
+        ports:
+            - 8350:80
+        restart: always
+        tty: true
+        volumes:
+            - ./nginx/conf.d:/etc/nginx/conf.d/
+            - ./nginx/keys:/etc/nginx/keys
+            - ./nginx/statics:/etc/nginx/static/statics
+    pocketbasec:
+        build:
+            context: ./pocketbase_custom
+        hostname: pocketbasec
+        restart: always
+        volumes:
+            - ./pocketbase_custom/pbdata:/pocketbase/pb_data
+        environment:
+            - AUTHROOT=https://dev-meecha.mattuu.com/auth/
+    redis:
+        hostname: redis
+        image: redis:latest
+        restart: always
+        volumes:
+            - ./databases/MainRedis:/data
+    app:
+        hostname: app
+        build:
+            context: ./app
+            dockerfile: Dockerfile
+        restart: always
+        volumes:
+            - ./app/src:/root/src
+        tty: true
