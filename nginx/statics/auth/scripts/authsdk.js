@@ -11,6 +11,24 @@ async function GetSession() {
     return authData;
 }
 
+async function GetJwt() {
+    // セッション更新
+    const authData = await GetSession();
+
+    const req = await fetch("/auth/jwt",{
+        method: "GET",
+        headers : {
+            "Authorization" : authData["token"],
+        }
+    });
+
+    // トークンを取得
+    const payload = await req.json();
+    const token = payload["result"];
+
+    return token;
+}
+
 
 function Logout(do_reload) {
     try {

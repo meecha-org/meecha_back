@@ -8,5 +8,6 @@ pocketbase_custom/src/pb_data/
 .env
 pocketbase_custom/src/vendor/
 *__debug_bin*
-pocketbase_custom/src/public_key.pem
-pocketbase_custom/src/private_key.pem
+public_key.pem
+private_key.pem
+

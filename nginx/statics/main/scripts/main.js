@@ -45,5 +45,14 @@ async function TestJwt() {
     })
 
     const payload = await req.json();
-    console.log(payload["result"]);
+    const token = payload["result"];
+
+    const req2 = await fetch("/app/",{
+        method: "GET",
+        headers: {
+            "Authorization" : "Bearer " + token,
+        }
+    });
+    
+    console.log(await req2.json());
 }
