@@ -11,6 +11,10 @@ async function GetSession() {
     return authData;
 }
 
+function IsAuthed() {
+    return pb.authStore.isValid;
+}
+
 async function GetJwt() {
     // セッション更新
     const authData = await GetSession();
