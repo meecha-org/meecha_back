@@ -13,7 +13,7 @@ services:
     pocketbasec:
         build:
             context: ./pocketbase_custom
-            target: Develop
+            # target: Develop
         hostname: pocketbasec
         restart: always
         volumes:

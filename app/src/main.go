@@ -1,15 +1,26 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
+	"new-meecha/controllers"
+	"new-meecha/grpc"
 	"new-meecha/middlewares"
 	"new-meecha/websocket"
 
+	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
 
 func main() {
+	// env 読み込み
+	loadEnv()
+
+	// grpc 初期化
+	grpc.Init()
+
+	// ルーター
 	router := echo.New()
 
 	// router.Use(middleware.Recover())
@@ -17,13 +28,33 @@ func main() {
 	// router.Use(middlewares.PocketAuth())
 
 	router.GET("/", func(ctx echo.Context) error {
-		return ctx.JSON(http.StatusOK,echo.Map{
-			"result" : "hello world",
+		return ctx.JSON(http.StatusOK, echo.Map{
+			"result": "hello world",
 		})
-	},middlewares.PocketAuth())
+	}, middlewares.PocketAuth())
 
+	// フレンドグループ
+	friendg := router.Group("/friend")
+	{
+		// 検索するエンドポイント
+		friendg.POST("/search",controllers.SearchUser,middlewares.PocketAuth())
+	}
+	
 	// websocket 用
-	router.GET("/ws",websocket.HandleWs)
+	router.GET("/ws", websocket.HandleWs)
 
 	router.Logger.Fatal(router.Start(":8090"))
+}
+
+// .envを呼び出します。
+func loadEnv() {
+	// ここで.envファイル全体を読み込みます。
+	// この読み込み処理がないと、個々の環境変数が取得出来ません。
+	// 読み込めなかったら err にエラーが入ります。
+	err := godotenv.Load(".env")
+
+	// もし err がnilではないなら、"読み込み出来ませんでした"が出力されます。
+	if err != nil {
+		fmt.Printf("読み込み出来ませんでした: %v", err)
+	}
 }

@@ -21,14 +21,14 @@ var (
 )
 
 func RunServer(app *pocketbase.PocketBase) {
-	log.Print("main start")
+	log.Print("Bind Grpc Server : " + os.Getenv("GRPC_ADDR"))
 
 	// グローバル変数に設定
 	gApp = app
 	apiKey = os.Getenv("GRPC_KEY")
 
 	// 9000番ポートでクライアントからのリクエストを受け付けるようにする
-	listen, err := net.Listen("tcp", ":"+os.Getenv("GRPC_PORT"))
+	listen, err := net.Listen("tcp", os.Getenv("GRPC_ADDR"))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
@@ -70,7 +70,7 @@ func (srpc *authServer) SearchByName(ctx context.Context, args *NameSearchMessag
 
 	// 検索
 	err := gApp.DB().
-		Select("id", "name").
+		Select("id", "name","labels").
 		From("users").
 		AndWhere(dbx.Like("name", args.Name)).
 		All(&users)
@@ -85,6 +85,7 @@ func (srpc *authServer) SearchByName(ctx context.Context, args *NameSearchMessag
 
 	// ユーザーデータを回す
 	for _, val := range users {
+
 		// リストに追加
 	    rUsers = append(rUsers, &User{
 			UserID:        val.Id,
