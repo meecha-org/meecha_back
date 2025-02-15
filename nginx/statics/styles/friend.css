@@ -5,12 +5,10 @@
 
 .accept_request_btn {
     border-bottom: 2px solid #5da38ccc;
-    margin-right: 20px;
 }
 
 .reject_request_btn{
     border-bottom: 2px solid #5da38ccc;
-    margin-left: 20px;
 }
 
 .friend_btn {
@@ -34,4 +32,9 @@
 .user_icon{
     width: 50px;
     border-radius: 50%;
+}
+
+.username_area {
+    width: 100px;
+    overflow-x: scroll;
 }

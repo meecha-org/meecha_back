@@ -6,6 +6,7 @@ import (
 	"new-meecha/controllers"
 	"new-meecha/grpc"
 	"new-meecha/middlewares"
+	"new-meecha/models"
 	"new-meecha/websocket"
 
 	"github.com/joho/godotenv"
@@ -16,6 +17,9 @@ import (
 func main() {
 	// env 読み込み
 	loadEnv()
+
+	// モデル初期化
+	models.Init()
 
 	// grpc 初期化
 	grpc.Init()
@@ -36,8 +40,32 @@ func main() {
 	// フレンドグループ
 	friendg := router.Group("/friend")
 	{
+		// ミドルウェア設定
+		friendg.Use(middlewares.PocketAuth())
+
 		// 検索するエンドポイント
-		friendg.POST("/search",controllers.SearchUser,middlewares.PocketAuth())
+		friendg.POST("/search",controllers.SearchUser)
+
+		// フレンド一覧取得
+		friendg.GET("/list",controllers.GetFriendList)
+
+		// リクエスト(送信)
+		friendg.POST("/request",controllers.FriendRequest)
+
+		// 送信済みリクエスト 取得
+		friendg.GET("/sentrequest",controllers.GetSentRequest)
+
+		// 受信済みリクエスト 取得
+		friendg.GET("/recvrequest",controllers.RecvedRequest)
+
+		// リクエストを承認する
+		friendg.POST("/accept",controllers.AcceptRequest)
+
+		// リクエストを拒否する
+		friendg.POST("/reject",controllers.RejectRequest)
+
+		// フレンド削除
+		friendg.POST("/remove",controllers.RemoveFriend)
 	}
 	
 	// websocket 用
