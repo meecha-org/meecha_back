@@ -4,6 +4,7 @@ import (
 	"errors"
 	"new-meecha/grpc"
 	"new-meecha/models"
+	rediscache "new-meecha/redis-cache"
 	"new-meecha/utils"
 )
 
@@ -133,6 +134,24 @@ func AcceptRequest(requestId string,myId string) error {
 		return err
 	}
 
+	// キャッシュ更新 (自分)
+	err = CacheFriend(myId)
+
+	// エラー処理
+	if err != nil {
+		// キャッシュの保存に失敗した場合
+		utils.Println(err)
+	}
+
+	// キャッシュ更新 (相手)
+	err = CacheFriend(request.SenderID)
+
+	// エラー処理
+	if err != nil {
+		// キャッシュの保存に失敗した場合
+		utils.Println(err)
+	}
+
 	// リクエストを削除
 	return models.RemoveRequest(requestId)
 }
@@ -156,12 +175,29 @@ func RejectRequest(myid,requestId string) error {
 }
 
 func GetFriendList(userid string) ([]string,error) {
+	// キャッシュから取得
+	cached,err := rediscache.GetCacheFriend(userid)
+
+	// 成功したとき
+	if err == nil {
+		return cached.FriendIds,nil
+	}
+
 	// フレンドリストを取得
 	friends,err := models.GetFriendList(userid)
 
 	// エラー処理
 	if err != nil {
 		return []string{},err
+	}
+
+	// キャッシュに保存
+	err = CacheFriend(userid)
+
+	// エラー処理
+	if err != nil {
+		// キャッシュの保存に失敗した場合
+		utils.Println(err)
 	}
 
 	return friends,nil
@@ -181,5 +217,81 @@ func RemoveFriend(userid string,targetid string) error {
 	}
 
 	// フレンドを削除
-	return models.RemoveFriend(friend.FriendID)
+	err = models.RemoveFriend(friend.FriendID)
+
+	// エラー処理
+	if err != nil {
+		return err
+	}
+
+	// キャッシュ更新 (自分)
+	err = CacheFriend(userid)
+
+	// エラー処理
+	if err != nil {
+		// キャッシュの保存に失敗した場合
+		utils.Println(err)
+	}
+
+	// キャッシュ更新 (相手)
+	err = CacheFriend(targetid)
+
+	// エラー処理
+	if err != nil {
+		// キャッシュの保存に失敗した場合
+		utils.Println(err)
+	}
+
+	// フレンドを削除
+	return nil
+}
+
+// ユーザーのフレンドをキャッシュする
+func CacheFriend(userid string) error {
+	// フレンドリストを取得
+	friends,err := models.GetFriendList(userid)
+
+	// エラー処理
+	if err != nil {
+		return err
+	}
+
+	// キャッシュ更新
+	utils.Println("キャッシュ更新")
+	utils.Println(userid)
+	utils.Println(friends)
+
+	// キャッシュに保存
+	err = rediscache.AddCacheFriend(rediscache.CacheFriendArgs{
+		UserID:   userid,
+		Data: rediscache.FriendCache{
+			FriendIds: friends,
+		},
+	})
+
+	// エラー処理
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// 送信済みリクエストをキャンセルする
+func CancelRequest(myid,requestId string) error {
+	// リクエストを取得
+	request, err := models.GetRequestByID(requestId)
+
+	// エラー処理
+	if err != nil {
+		return err
+	}
+
+	// 自分が送ったリクエストか
+	if request.SenderID != myid {
+		return errors.New("invalid request")
+	}
+
+	// リクエストを削除
+	return models.RemoveRequest(requestId)
 }

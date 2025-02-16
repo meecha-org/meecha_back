@@ -28,6 +28,8 @@ services:
         restart: always
         volumes:
             - ./databases/MainRedis:/data
+        ports:
+            - 6379:6379
     app:
         hostname: app
         build:
@@ -38,3 +40,27 @@ services:
             - ./app/src:/root/src
             - ./pocketbase_custom/pbdata/public_key.pem:/root/src/public_key.pem
         tty: true
+    postgres:
+        image: postgres:17.3-alpine3.21
+        hostname: postgres
+        # ports:
+        #     - 5432:5432
+        volumes:
+            - db-store:/var/lib/postgresql/data
+        environment:
+            POSTGRES_USER: 'user'
+            POSTGRES_PASSWORD: 'postgres'
+            POSTGRES_DB: 'meecha'    
+    # mysql:
+    #     image: mysql:8.0.34
+    #     hostname: mysql
+    #     # ports:
+    #     #     - 3306:3306
+    #     environment:
+    #         MYSQL_ROOT_PASSWORD: root
+    #         TZ: Asia/Tokyo
+    #     volumes:
+    #         - ./databases/mysql/data:/var/lib/mysql
+    #         - ./databases/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
+volumes:
+    db-store:

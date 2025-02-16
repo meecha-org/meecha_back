@@ -197,3 +197,26 @@ func RemoveFriend(ctx echo.Context) error {
 
 	return ctx.NoContent(http.StatusOK)
 }
+
+func CancelRequest(ctx echo.Context) error {
+	// bind
+	var args RequestArgs
+	if err := ctx.Bind(&args); err != nil {
+		utils.Println("failed to bind json : " + err.Error())
+		return ctx.NoContent(http.StatusBadRequest)
+	}
+
+	// ユーザー情報を取得
+	myid := ctx.Get("UserID").(string)
+
+	// リクエストを取得
+	err := services.CancelRequest(myid,args.RequestID)
+
+	// エラー処理
+	if err != nil {
+		utils.Println(err)
+		return ctx.NoContent(http.StatusConflict)
+	}
+
+	return ctx.NoContent(http.StatusOK)
+}

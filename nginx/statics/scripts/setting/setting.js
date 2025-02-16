@@ -213,6 +213,30 @@ sended_request_button.addEventListener("click",async function (evt) {
     }
 });
 
+// リクエストをキャンセルする
+async function CancelRequest(requestId) {
+    // JWT取得
+    const jwtToken = await GetJwt();
+
+    // リクエスト送信
+    const req = await fetch("/app/friend/cancel",{
+        method: "POST",
+        headers: {
+            "Authorization": "Bearer " + jwtToken,
+            "Content-type": "application/json"
+        },
+        body: JSON.stringify({
+            "requestid": requestId
+        })
+    });
+
+    if (req.status != 200) {
+        return false;
+    }
+
+    return true;
+}
+
 // 送信済みリクエストを作成
 function createSentRequestDataArea(userIconSrc, username, buttonId) {
     // リクエストデータエリアのdivを作成
@@ -234,6 +258,22 @@ function createSentRequestDataArea(userIconSrc, username, buttonId) {
     buttonElement.className = "friend_btn";
     buttonElement.id = buttonId; // ボタンのIDを設定
     buttonElement.textContent = "取り消し"; // ボタンのテキストを設定
+    buttonElement.addEventListener("click", async function (evt) {
+        try {
+            // キャセルリクエスト
+            if (await CancelRequest(buttonId)) {
+                ShowNotify("キャンセルしました");
+            } else {
+                throw "キャンセルに失敗しました";
+            }
+
+            // リロード
+            sended_request_button.click();
+        } catch (ex) {
+            console.error(ex);
+            ShowNotify("キャンセルに失敗しました");
+        }
+    })
 
     // リクエストデータエリアに要素を追加
     requestDataArea.appendChild(iconElement);

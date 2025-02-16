@@ -7,7 +7,7 @@ import (
 	"new-meecha/grpc"
 	"new-meecha/middlewares"
 	"new-meecha/models"
-	"new-meecha/websocket"
+	rediscache "new-meecha/redis-cache"
 
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
@@ -20,6 +20,9 @@ func main() {
 
 	// モデル初期化
 	models.Init()
+
+	// redis 初期化
+	rediscache.Init()
 
 	// grpc 初期化
 	grpc.Init()
@@ -66,10 +69,13 @@ func main() {
 
 		// フレンド削除
 		friendg.POST("/remove",controllers.RemoveFriend)
+
+		// リクエストをキャンセル
+		friendg.POST("/cancel",controllers.CancelRequest)
 	}
 	
 	// websocket 用
-	router.GET("/ws", websocket.HandleWs)
+	// router.GET("/ws", websocket.HandleWs)
 
 	router.Logger.Fatal(router.Start(":8090"))
 }
