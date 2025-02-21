@@ -33,7 +33,7 @@ func NowTime() int64 {
 
 func init() {
 	const privKeyFile = "./pb_data/private_key.pem"
-	const pubKeyFile = "./pb_data/public_key.pem"
+	const pubKeyFile = "./pb_data/authPublic/public_key.pem"
 
 	// 鍵ペアを生成するか、既存の鍵を読み込む
 

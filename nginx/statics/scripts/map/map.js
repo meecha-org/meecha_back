@@ -56,3 +56,15 @@ function MovePin(PinID, latitude, longitude) {
     // 新くピンを撃つ
     NewPin(PinID,targetPin.IconURL,latitude,longitude);
 }
+
+// ピンが存在するか
+function ExistPin(PinID) {
+    return PinID in mapPins;
+}
+
+// ピンを削除する
+function RemovePin(PinID) {
+    const targetPin = mapPins[PinID];
+    map.removeLayer(targetPin.Pin);
+    delete mapPins[PinID];
+}
