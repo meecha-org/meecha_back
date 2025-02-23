@@ -16,6 +16,11 @@ type Location struct {
 	Timestamp int64   `json:"timestamp"` // タイムスタンプ
 }
 
+type NearResponse struct {
+	Removed     []string     `json:"removed"` //距離が離れたフレンド
+	NearFriends []NearFriend `json:"near"`    //近くにいるフレンド
+}
+
 type NearFriend struct {
 	UserID    string  `json:"userid"`    //相手のユーザーID
 	Latitude  float64 `json:"latitude"`  // 緯度
@@ -24,7 +29,7 @@ type NearFriend struct {
 }
 
 // 位置情報を更新して近くにいるフレンドを返す
-func UpdateLocation(args Location) ([]NearFriend, error) {
+func UpdateLocation(args Location) (NearResponse, error) {
 	// redis に保存
 	err := conn.GeoAdd(context.Background(), geoKey, &redis.GeoLocation{
 		Name:      args.UserID,
@@ -35,7 +40,7 @@ func UpdateLocation(args Location) ([]NearFriend, error) {
 	// エラー処理
 	if err != nil {
 		utils.Println(err)
-		return []NearFriend{}, err
+		return NearResponse{}, err
 	}
 
 	// フレンド情報を取得
@@ -44,7 +49,7 @@ func UpdateLocation(args Location) ([]NearFriend, error) {
 	// エラー処理
 	if err != nil {
 		utils.Println(err)
-		return []NearFriend{}, err
+		return NearResponse{}, err
 	}
 
 	// 半径5キロ以内のユーザー取得
@@ -58,11 +63,12 @@ func UpdateLocation(args Location) ([]NearFriend, error) {
 	// エラー処理
 	if err != nil {
 		utils.Println(err)
-		return []NearFriend{}, err
+		return NearResponse{}, err
 	}
 
 	// 返すフレンド一覧
 	retuurnFriends := []NearFriend{}
+	NearFriendIds := []string{}
 
 	for _, user := range nearUsers {
 		// 近くにいるユーザーIDをとる
@@ -86,7 +92,77 @@ func UpdateLocation(args Location) ([]NearFriend, error) {
 			Longitude: user.Longitude,
 			Dist:      user.Dist,
 		})
+
+		// ID一覧の追加
+		NearFriendIds = append(NearFriendIds, user.Name)
 	}
 
-	return retuurnFriends, nil
+	// キャッシュが存在するか
+	if !ExistLocationCache(args.UserID) {
+		// キャッシュが存在しない時
+
+		// キャッシュを作成
+		err := SetCacheLocation(LocationCache{
+			UserID:          args.UserID,
+			LastNearFriends: NearFriendIds,
+			Timestamp:       utils.NowTime(),
+		})
+
+		// エラー処理
+		if err != nil {
+			utils.Println(err)
+			return NearResponse{},err
+		}
+		
+		// データを返す
+		return NearResponse{
+			Removed:     []string{},
+			NearFriends: retuurnFriends,
+		},nil
+	}
+
+	// キャッシュが存在する時
+	// キャッシュを取得
+	lastCached,err := GetCachedLocation(args.UserID)
+
+	// エラー処理
+	if err != nil {
+		utils.Println(err)
+		return NearResponse{},err
+	}
+
+	// 範囲から外れたフレンドを取得
+	nearRemoved := findRemovedElements(lastCached.LastNearFriends,NearFriendIds)
+
+	// キャッシュを更新
+	err = SetCacheLocation(LocationCache{
+		UserID:          args.UserID,
+		LastNearFriends: NearFriendIds,
+		Timestamp:       utils.NowTime(),
+	})
+
+	return NearResponse{
+		Removed:     nearRemoved,
+		NearFriends: retuurnFriends,
+	}, err
+}
+
+// 配列から消えた要素を取得する
+func findRemovedElements(original []string, updated []string) []string {
+	removed := []string{}
+	updatedSet := make(map[string]struct{}, len(updated))
+
+	// 更新された配列の要素をマップに格納
+	for _, item := range updated {
+		updatedSet[item] = struct{}{}
+	}
+
+	// 元の配列の要素をチェック
+	for _, item := range original {
+		if _, found := updatedSet[item]; !found {
+			removed = append(removed, item)
+		}
+	}
+
+	return removed
 }

@@ -20,7 +20,7 @@ services:
             - ./pocketbase_custom/pbdata:/pocketbase/pb_data
             - ./pocketbase_custom/src:/root/pocketbase
         environment:
-            - AUTHROOT=https://dev-meecha.mattuu.com/auth/
+            - AUTHROOT=https://localhost:8350/auth/
         tty: true
     redis:
         hostname: redis
