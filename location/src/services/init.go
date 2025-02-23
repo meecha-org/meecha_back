@@ -42,8 +42,8 @@ func Init() {
 		for {
 			// 有効期限が切れたキーを削除する
 			RemoveExpiryGeo()
-			
-			time.Sleep(time.Second * 5)
+
+			time.Sleep(time.Second * 3)
 		}
 	}()
 }
