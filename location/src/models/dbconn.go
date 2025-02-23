@@ -2,6 +2,7 @@ package models
 
 import (
 	"log"
+	"os"
 	// "os"
 
 	// "gorm.io/driver/sqlite"
@@ -16,11 +17,7 @@ var (
 
 func Init() {
 	// データベースを開く
-	// db, err := gorm.Open(sqlite.Open(os.Getenv("DBPATH")), &gorm.Config{})
-	// dsn := "root:root@tcp(mysql:3306)/meecha?charset=utf8mb4&parseTime=True&loc=Local"
-	// db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
-
-	dsn := "host=postgres user=user password=postgres dbname=meecha port=5432 sslmode=disable TimeZone=Asia/Tokyo"
+	dsn := os.Getenv("POSTGRES_DSN")
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatal("failed to connect database")

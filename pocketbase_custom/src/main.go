@@ -1,14 +1,12 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"pocketbasec/grpc"
 	"time"
 
 	validation "github.com/go-ozzo/ozzo-validation/v4"
-	"github.com/joho/godotenv"
 
 	// "github.com/labstack/echo/v5"
 	"github.com/pocketbase/pocketbase"
@@ -39,23 +37,7 @@ func main() {
 	RunServer()
 }
 
-// .envを呼び出します。
-func loadEnv() {
-	// ここで.envファイル全体を読み込みます。
-	// この読み込み処理がないと、個々の環境変数が取得出来ません。
-	// 読み込めなかったら err にエラーが入ります。
-	err := godotenv.Load("./pb_data/.env")
-	
-	// もし err がnilではないなら、"読み込み出来ませんでした"が出力されます。
-	if err != nil {
-		fmt.Printf("読み込み出来ませんでした: %v", err)
-	}
-}
-
 func RunServer() {
-	// env 読み込み
-	loadEnv()
-
 	app := pocketbase.New()
 
 	// ユーザー認証

@@ -20,7 +20,9 @@ services:
             - ./pocketbase_custom/pbdata:/pocketbase/pb_data
             - ./pocketbase_custom/src:/root/pocketbase
         environment:
-            - AUTHROOT=https://localhost:8350/auth/
+            AUTHROOT: 'https://localhost:8350/auth/'
+            GRPC_ADDR: ':9000'
+            GRPC_KEY: 'ORVBHieON30gk8dBo3DkMRPkMhpiyKS2NARNkmKwJogJ4uDZmKfoivZOMj0Xx70T'
         tty: true
     redis:
         hostname: redis
@@ -33,12 +35,17 @@ services:
         build:
             context: ./app
             dockerfile: Dockerfile
+            # target: Develop
         restart: always
         volumes:
             - ./app/src:/root/src
             - ./pocketbase_custom/pbdata/authPublic:/root/src/authPublic
             - ./pocketbase_custom/pbdata/authPublic:/authPublic
         tty: true
+        environment:
+            GRPC_SERVER: 'pocketbasec:9000'
+            GRPC_KEY: 'ORVBHieON30gk8dBo3DkMRPkMhpiyKS2NARNkmKwJogJ4uDZmKfoivZOMj0Xx70T'
+            POSTGRES_DSN: 'host=postgres user=user password=postgres dbname=meecha port=5432 sslmode=disable TimeZone=Asia/Tokyo'
         depends_on:
             - postgres
             - pocketbasec
@@ -47,8 +54,10 @@ services:
         build:
             context: ./location
             dockerfile: Dockerfile
-            target: Develop
+            # target: Develop
         restart: always
+        environment:
+            POSTGRES_DSN: 'host=postgres user=user password=postgres dbname=meecha port=5432 sslmode=disable TimeZone=Asia/Tokyo'    
         volumes:
             - ./location/src:/root/src
             - ./pocketbase_custom/pbdata/authPublic:/root/src/authPublic

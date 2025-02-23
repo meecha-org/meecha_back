@@ -1,22 +1,17 @@
 package main
 
 import (
-	"fmt"
 	"location/controllers"
 	"location/middlewares"
 	redisfriend "location/redis-friend"
 	"location/services"
 	"net/http"
 
-	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
 
 func main() {
-	// env 読み込み
-	loadEnv()
-
 	// redis 初期化
 	redisfriend.Init()
 
@@ -40,17 +35,4 @@ func main() {
 	router.POST("/update",controllers.UpdateLocation,middlewares.PocketAuth())
 
 	router.Logger.Fatal(router.Start(":8090"))
-}
-
-// .envを呼び出します。
-func loadEnv() {
-	// ここで.envファイル全体を読み込みます。
-	// この読み込み処理がないと、個々の環境変数が取得出来ません。
-	// 読み込めなかったら err にエラーが入ります。
-	err := godotenv.Load(".env")
-
-	// もし err がnilではないなら、"読み込み出来ませんでした"が出力されます。
-	if err != nil {
-		fmt.Printf("読み込み出来ませんでした: %v", err)
-	}
 }
