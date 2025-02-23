@@ -44,4 +44,4 @@ locationInterval = setInterval(async () => {
             return;
         }
     })
-}, 3000);
+}, 2000);

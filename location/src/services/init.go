@@ -2,6 +2,7 @@ package services
 
 import (
 	"location/utils"
+	"time"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -9,7 +10,6 @@ import (
 var (
 	conn *redis.Client = nil
 	cacheConn *redis.Client = nil
-	geoKey = "meecha_geo"
 )
 
 func Init() {
@@ -37,4 +37,15 @@ func Init() {
 	utils.Println(conn)
 	utils.Println(cacheConn)
 	utils.Println("location redis connected")
+
+	go func() {
+		for {
+			// 有効期限が切れたキーを削除する
+			RemoveExpiryGeo()
+			
+			time.Sleep(time.Second * 5)
+		}
+	}()
 }
+
+

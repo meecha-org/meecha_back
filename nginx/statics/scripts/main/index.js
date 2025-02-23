@@ -31,7 +31,7 @@ async function Init() {
                 latitude: data.latitude,
                 longitude: data.longitude
             }));
-        }, 1000);
+        }, 3000);
     } catch (ex) {
         console.error(ex);
     }
