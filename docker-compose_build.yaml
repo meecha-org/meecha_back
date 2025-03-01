@@ -11,6 +11,7 @@ services:
             - ./nginx/keys:/etc/nginx/keys
             - ./nginx/statics:/etc/nginx/static/statics
     pocketbasec:
+        image: private-hub.tail6cf7b.ts.net:3000/meecha-auth
         build:
             context: ./pocketbase_custom
             # target: Develop
@@ -31,6 +32,7 @@ services:
         ports:
             - 6379:6379
     app:
+        image: private-hub.tail6cf7b.ts.net:3000/meecha-app
         hostname: app
         build:
             context: ./app
@@ -51,6 +53,7 @@ services:
             - database
             - pocketbasec
     location:
+        image: private-hub.tail6cf7b.ts.net:3000/meecha-location
         hostname: location
         build:
             context: ./location

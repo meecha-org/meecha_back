@@ -45,10 +45,9 @@ services:
         environment:
             GRPC_SERVER: 'pocketbasec:9000'
             GRPC_KEY: 'ORVBHieON30gk8dBo3DkMRPkMhpiyKS2NARNkmKwJogJ4uDZmKfoivZOMj0Xx70T'
-            # DATABASE_DSN: 'host=postgres user=user password=postgres dbname=meecha port=5432 sslmode=disable TimeZone=Asia/Tokyo'
-            DATABASE_DSN: 'root:root@tcp(mysql:3306)/meecha?charset=utf8mb4&parseTime=True&loc=Local'
+            POSTGRES_DSN: 'host=postgres user=user password=postgres dbname=meecha port=5432 sslmode=disable TimeZone=Asia/Tokyo'
         depends_on:
-            - database
+            - postgres
             - pocketbasec
     location:
         hostname: location
@@ -58,41 +57,39 @@ services:
             # target: Develop
         restart: always
         environment:
-            # DATABASE_DSN: 'host=postgres user=user password=postgres dbname=meecha port=5432 sslmode=disable TimeZone=Asia/Tokyo'    
-            DATABASE_DSN: 'root:root@tcp(mysql:3306)/meecha?charset=utf8mb4&parseTime=True&loc=Local'
+            POSTGRES_DSN: 'host=postgres user=user password=postgres dbname=meecha port=5432 sslmode=disable TimeZone=Asia/Tokyo'    
         volumes:
             - ./location/src:/root/src
             - ./pocketbase_custom/pbdata/authPublic:/root/src/authPublic
             - ./pocketbase_custom/pbdata/authPublic:/authPublic
         tty: true
         depends_on:
-            - database
-    # postgres:
-    #     image: postgres:17.3-alpine3.21
-    #     hostname: postgres
-    #     healthcheck:
-    #         test: ["CMD-SHELL", "pg_isready -U postgres"]
-    #         interval: 5s
-    #         timeout: 5s
-    #         retries: 5
-    #     volumes:
-    #         - db-store:/var/lib/postgresql/data
-    #     environment:
-    #         POSTGRES_USER: 'user'
-    #         POSTGRES_PASSWORD: 'postgres'
-    #         POSTGRES_DB: 'meecha'    
-    database:
-        image: mysql:8.0.34
-        hostname: mysql
-        # ports:
-        #     - 3306:3306
-        environment:
-            MYSQL_ROOT_PASSWORD: root
-            TZ: Asia/Tokyo
-            MYSQL_DATABASE: meecha
+            postgres:
+                condition: service_healthy
+    postgres:
+        image: postgres:17.3-alpine3.21
+        hostname: postgres
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U postgres"]
+            interval: 5s
+            timeout: 5s
+            retries: 5
         volumes:
-            - db-store:/var/lib/mysql
-            - ./databases/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
+            - db-store:/var/lib/postgresql/data
+        environment:
+            POSTGRES_USER: 'user'
+            POSTGRES_PASSWORD: 'postgres'
+            POSTGRES_DB: 'meecha'    
+    # mysql:
+    #     image: mysql:8.0.34
+    #     hostname: mysql
+    #     # ports:
+    #     #     - 3306:3306
+    #     environment:
+    #         MYSQL_ROOT_PASSWORD: root
+    #         TZ: Asia/Tokyo
+    #     volumes:
+    #         - ./databases/mysql/data:/var/lib/mysql
+    #         - ./databases/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
 volumes:
     db-store:
-        name: meecha-db-store

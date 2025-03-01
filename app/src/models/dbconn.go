@@ -6,8 +6,8 @@ import (
 	// "os"
 
 	// "gorm.io/driver/sqlite"
-	// "gorm.io/driver/mysql"
-	"gorm.io/driver/postgres"
+	"gorm.io/driver/mysql"
+	// "gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
@@ -20,9 +20,13 @@ func Init() {
 	// db, err := gorm.Open(sqlite.Open(os.Getenv("DBPATH")), &gorm.Config{})
 	// dsn := "root:root@tcp(mysql:3306)/meecha?charset=utf8mb4&parseTime=True&loc=Local"
 	// db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	// db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	
+	// データベースの接続情報
+	dsn := os.Getenv("DATABASE_DSN")
 
-	dsn := os.Getenv("POSTGRES_DSN")
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	// データベースを開く
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatal("failed to connect database")
 	}
