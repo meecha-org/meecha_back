@@ -22,7 +22,7 @@ locationInterval = setInterval(async () => {
     });
 
     const result = await req.json();
-    result.forEach(nUser => {
+    result["near"].forEach(nUser => {
         // ピンが存在するか判定
         if (ExistPin(nUser["userid"])) {
             // 存在するとき動かす
@@ -33,4 +33,15 @@ locationInterval = setInterval(async () => {
         // 近くにいるフレンド表示
         NewPin(nUser["userid"],GetIcon(nUser["userid"]),nUser["latitude"],nUser["longitude"]);
     });
-}, 3000);
+
+    // 離れたフレンドのピンを消す
+    result["removed"].forEach(dUserID => {
+        // ピンが存在するか判定
+        if (ExistPin(dUserID)) {
+            // 存在するとき消す
+            RemovePin(dUserID);
+
+            return;
+        }
+    })
+}, 2000);

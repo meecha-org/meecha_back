@@ -23,6 +23,5 @@ RUN CGO_ENABLED=0 go build -x -o meecha_server .
 
 # Now copy it into our base image.
 FROM gcr.io/distroless/static-debian12
-COPY --from=Release /root/app/.env /
 COPY --from=Release /root/app/meecha_server /
 CMD ["/meecha_server"]
