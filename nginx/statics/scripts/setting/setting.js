@@ -68,7 +68,7 @@ async function SendRequest(uid) {
     const req = await fetch("/app/friend/request", {
         method: "POST",
         headers: {
-            "Authorization": "Bearer " + jwtToken,
+            "Authorization": jwtToken,
             "Content-type": "application/json"
         },
         body: JSON.stringify({
@@ -146,7 +146,7 @@ user_search_button.addEventListener("click", async function (evt) {
         const req = await fetch("/app/friend/search", {
             method: "POST",
             headers: {
-                "Authorization": "Bearer " + jwtToken,
+                "Authorization": jwtToken,
                 "Content-type": "application/json"
             },
             body: JSON.stringify({
@@ -189,7 +189,7 @@ sended_request_button.addEventListener("click",async function (evt) {
         const req = await fetch("/app/friend/sentrequest",{
             method: "GET",
             headers: {
-                "Authorization": "Bearer " + jwtToken,
+                "Authorization": jwtToken,
                 "Content-type": "application/json"
             },
         });
@@ -209,7 +209,7 @@ sended_request_button.addEventListener("click",async function (evt) {
             const uinfo = await req.json();
 
             // フレンドリクエストを作成
-            sended_request_show_area.appendChild(createSentRequestDataArea(GetIcon(request["target"]),uinfo["result"]["UserName"],request["id"]));
+            sended_request_show_area.appendChild(createSentRequestDataArea(GetIcon(request["target"]),uinfo["UserName"],request["id"]));
         });
 
         sended_log_area.textContent = "";
@@ -228,7 +228,7 @@ async function CancelRequest(requestId) {
     const req = await fetch("/app/friend/cancel",{
         method: "POST",
         headers: {
-            "Authorization": "Bearer " + jwtToken,
+            "Authorization": jwtToken,
             "Content-type": "application/json"
         },
         body: JSON.stringify({
@@ -306,7 +306,7 @@ get_request_button.addEventListener("click",async function (evt) {
         const req = await fetch("/app/friend/recvrequest",{
             method: "GET",
             headers: {
-                "Authorization": "Bearer " + jwtToken,
+                "Authorization": jwtToken,
                 "Content-type": "application/json"
             },
         });
@@ -326,7 +326,7 @@ get_request_button.addEventListener("click",async function (evt) {
             const uinfo = await req.json();
 
             // フレンドリクエストを作成
-            recved_request_show_area.appendChild(createRecvedRequestDataArea(GetIcon(request["sender"]),uinfo["result"]["UserName"],request["id"]));
+            recved_request_show_area.appendChild(createRecvedRequestDataArea(GetIcon(request["sender"]),uinfo["UserName"],request["id"]));
         });
 
         recved_log_area.textContent = "";
@@ -421,7 +421,7 @@ async function AcceptRequest(requestId) {
         const req = await fetch("/app/friend/accept",{
             method: "POST",
             headers: {
-                "Authorization": "Bearer " + jwtToken,
+                "Authorization": jwtToken,
                 "Content-type": "application/json"
             },
             body: JSON.stringify({
@@ -447,7 +447,7 @@ async function RejectRequest(requestId) {
         const req = await fetch("/app/friend/reject",{
             method: "POST",
             headers: {
-                "Authorization": "Bearer " + jwtToken,
+                "Authorization": jwtToken,
                 "Content-type": "application/json"
             },
             body: JSON.stringify({
@@ -484,7 +484,7 @@ get_friends_button.addEventListener("click", async function (evt) {
         const req = await fetch("/app/friend/list",{
             method: "GET",
             headers: {
-                "Authorization": "Bearer " + jwtToken,
+                "Authorization": jwtToken,
                 "Content-type": "application/json"
             },
         });
@@ -514,7 +514,7 @@ get_friends_button.addEventListener("click", async function (evt) {
             // ユーザー名
             const nameElement = document.createElement('p');
             nameElement.className = "username_area";
-            nameElement.textContent = uinfo["result"]["UserName"]; // ユーザー名を設定
+            nameElement.textContent = uinfo["UserName"]; // ユーザー名を設定
 
             // ボタン要素を作成
             const buttonElement = document.createElement('button');
@@ -545,7 +545,7 @@ get_friends_button.addEventListener("click", async function (evt) {
 
             friends_show_area.appendChild(friendDiv);
 
-            console.log(uinfo["result"]["UserName"]);
+            console.log(uinfo["UserName"]);
         });
 
         // メッセージを表示
@@ -564,7 +564,7 @@ async function DeleteFriend(userid) {
     const req = await fetch("/app/friend/remove",{
         method: "POST",
         headers: {
-            "Authorization": "Bearer " + jwtToken,
+            "Authorization": jwtToken,
             "Content-type": "application/json"
         },
         body: JSON.stringify({

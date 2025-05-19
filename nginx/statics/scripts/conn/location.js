@@ -13,7 +13,7 @@ locationInterval = setInterval(async () => {
         method: "POST",
         headers: {
             "Content-type": "application/json",
-            "Authorization": "Bearer " + jwtToken
+            "Authorization": jwtToken
         },
         body: JSON.stringify({
             "lat" : location.latitude,

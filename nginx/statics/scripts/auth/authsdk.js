@@ -10,36 +10,10 @@ function IsAuthed() {
 }
 
 async function GetJwt() {
-    // セッションストレージから現在時刻を取得
-    const tokenGenTime = window.sessionStorage.getItem("tokenGenTime");
-
-    // 5分以内なら
-    if (Date.now() - tokenGenTime < 5 * 60 * 1000) {
-        // トークンを取得
-        const token = window.sessionStorage.getItem("token");
-        return token;
-    }
-
     // セッション更新
     const acToken = await GetToken();
 
-    const req = await fetch("/auth/jwt",{
-        method: "GET",
-        headers : {
-            "Authorization" : acToken,
-        }
-    });
-
-    // トークンを取得
-    const payload = await req.json();
-    const token = payload["result"];
-
-    // トークンをセッションストレージに保存
-    window.sessionStorage.setItem("token", token);
-    // 現在時刻をセッションストレージに保存
-    window.sessionStorage.setItem("tokenGenTime", Date.now());
-
-    return token;
+    return acToken;
 }
 
 
@@ -70,5 +44,5 @@ async function Login(provider) {
 }
 
 function GetIcon(userid) {
-    return `/auth/icon/${userid}`;
+    return `/auth/assets/${userid}.png`;
 }
