@@ -110,3 +110,25 @@ func ToggleBan(ctx echo.Context) error {
 		"result" : "success",
 	})
 }
+
+// ユーザー情報
+type UserInfo struct {
+	UserName string   // ユーザー名
+	Labels   []string // ユーザーについたラベル
+}
+
+func GetUserInfo(ctx echo.Context) error {
+	// パスパラメーターを取得
+	userid := ctx.Param("userid")
+
+	// ユーザー情報を取得
+	userInfo, err := services.GetUserInfo(userid)
+
+	// エラー処理
+	if err != nil {
+		logger.PrintErr(err)
+		return ctx.JSON(http.StatusInternalServerError, echo.Map{"error": err.Error()})
+	}
+
+	return ctx.JSON(http.StatusOK, userInfo)
+}

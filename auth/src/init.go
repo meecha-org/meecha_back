@@ -81,6 +81,9 @@ func SetupRouter(router *echo.Echo) {
 	// ログアウト
 	router.POST("/logout", controllers.Logout, middlewares.RequireAuth)
 
+	// 情報を取得するエンドポイント
+	router.GET("/info/:userid", controllers.GetUserInfo)
+
 	// admin グループ
 	adming := router.Group("/admin")
 	{

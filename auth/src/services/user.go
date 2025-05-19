@@ -208,3 +208,32 @@ func ToggleBan(args BanArgs) error {
 }
 
 // ここまで
+
+// ここからユーザー情報取得
+type ReturnGetUserInfo struct {
+	UserName string   // ユーザー名
+	Labels   []string // ユーザーについたラベル
+}
+
+func GetUserInfo(userid string) (ReturnGetUserInfo, error) {
+	// ユーザー情報を取得
+	user, result := models.GetUser(userid)
+
+	// エラー処理
+	if result.Error != nil {
+		return ReturnGetUserInfo{}, result.Error
+	}
+
+	// ラベルを取得
+	labels,err := user.GetLabelNames()
+
+	// エラー処理
+	if err != nil {
+		return ReturnGetUserInfo{}, err
+	}
+
+	return ReturnGetUserInfo{
+		UserName: user.Name,
+		Labels:   labels,
+	}, nil
+}
