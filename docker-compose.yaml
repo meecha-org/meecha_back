@@ -1,98 +1,84 @@
 services:
+    # リバースプロキシけんWeサーバ
     nginx:
         hostname: nginx
         image: nginx:latest
         ports:
-            - 8350:80
+            - 8350:8443
         restart: always
         tty: true
         volumes:
-            - ./nginx/conf.d:/etc/nginx/conf.d/
+            - ./nginx/configs:/etc/nginx/conf.d/
             - ./nginx/keys:/etc/nginx/keys
             - ./nginx/statics:/etc/nginx/static/statics
-    pocketbasec:
+    
+    # 認証用コンテナ
+    auth:
+        hostname: auth
         build:
-            context: ./pocketbase_custom
-            # target: Develop
-        hostname: pocketbasec
-        restart: always
-        volumes:
-            - ./pocketbase_custom/pbdata:/pocketbase/pb_data
-            - ./pocketbase_custom/src:/root/pocketbase
-        environment:
-            AUTHROOT: 'https://localhost:8350/auth/'
-            GRPC_ADDR: ':9000'
-            GRPC_KEY: 'ORVBHieON30gk8dBo3DkMRPkMhpiyKS2NARNkmKwJogJ4uDZmKfoivZOMj0Xx70T'
+            context: ./auth
+            dockerfile: dockerfile
+            # target: Release
+            target: Develop
         tty: true
-    redis:
-        hostname: redis
-        image: redis:latest
+        stdin_open: true
+        env_file:
+            - ./openssl/jwtKeys/private.env
+            - ./config/auth.env
+        volumes:
+            - ./auth/src:/root/src
         restart: always
-        ports:
-            - 6379:6379
+        depends_on:
+            mysql:
+                condition: service_healthy
+    # ダッシュボード
+    # dashboard:
+    #     hostname: dashboard
+    #     build:
+    #         context: ./dashboard
+    #         dockerfile: dockerfile
+    #         target: Develop
+    #     tty: true
+    #     volumes:
+    #         - distvol:/root/src/dist
+    #         - ./dashboard/src:/root/src
+    #     restart: always
+
+    # 認証用コンテナ
     app:
         hostname: app
         build:
             context: ./app
-            dockerfile: Dockerfile
-            # target: Develop
-        restart: always
+            dockerfile: dockerfile
+            target: Develop
+        tty: true
+        env_file:
+            - ./openssl/jwtKeys/public.env
+            - ./config/app.env
         volumes:
             - ./app/src:/root/src
-            - ./pocketbase_custom/pbdata/authPublic:/root/src/authPublic
-            - ./pocketbase_custom/pbdata/authPublic:/authPublic
-        tty: true
-        environment:
-            GRPC_SERVER: 'pocketbasec:9000'
-            GRPC_KEY: 'ORVBHieON30gk8dBo3DkMRPkMhpiyKS2NARNkmKwJogJ4uDZmKfoivZOMj0Xx70T'
-            # DATABASE_DSN: 'host=postgres user=user password=postgres dbname=meecha port=5432 sslmode=disable TimeZone=Asia/Tokyo'
-            DATABASE_DSN: 'root:root@tcp(mysql:3306)/meecha?charset=utf8mb4&parseTime=True&loc=Local'
-        depends_on:
-            - database
-            - pocketbasec
-    location:
-        hostname: location
-        build:
-            context: ./location
-            dockerfile: Dockerfile
-            # target: Develop
         restart: always
-        environment:
-            # DATABASE_DSN: 'host=postgres user=user password=postgres dbname=meecha port=5432 sslmode=disable TimeZone=Asia/Tokyo'    
-            DATABASE_DSN: 'root:root@tcp(mysql:3306)/meecha?charset=utf8mb4&parseTime=True&loc=Local'
-        volumes:
-            - ./location/src:/root/src
-            - ./pocketbase_custom/pbdata/authPublic:/root/src/authPublic
-            - ./pocketbase_custom/pbdata/authPublic:/authPublic
-        tty: true
         depends_on:
-            - database
-    # postgres:
-    #     image: postgres:17.3-alpine3.21
-    #     hostname: postgres
-    #     healthcheck:
-    #         test: ["CMD-SHELL", "pg_isready -U postgres"]
-    #         interval: 5s
-    #         timeout: 5s
-    #         retries: 5
-    #     volumes:
-    #         - db-store:/var/lib/postgresql/data
-    #     environment:
-    #         POSTGRES_USER: 'user'
-    #         POSTGRES_PASSWORD: 'postgres'
-    #         POSTGRES_DB: 'meecha'    
-    database:
-        image: mysql:8.0.34
-        hostname: mysql
-        # ports:
-        #     - 3306:3306
+            mysql:
+                condition: service_healthy
+            auth:
+                condition: service_started
+    # データベース
+    mysql:
+        hostname: db
+        image: mysql
+        restart: always
         environment:
             MYSQL_ROOT_PASSWORD: root
             TZ: Asia/Tokyo
-            MYSQL_DATABASE: meecha
         volumes:
-            - db-store:/var/lib/mysql
-            - ./databases/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
+            - dbdata:/var/lib/mysql
+            - ./database/my.cnf:/etc/mysql/conf.d/my.cnf
+            - ./database/script/init.sql:/docker-entrypoint-initdb.d/init.sql 
+        healthcheck:
+            test: ["CMD", "mysqladmin", "ping", "-h", "db", "-u", "root", "-proot"]
+            interval: 5s
+            timeout: 10s
+            retries: 5
 volumes:
-    db-store:
-        name: meecha-db-store
+    dbdata:

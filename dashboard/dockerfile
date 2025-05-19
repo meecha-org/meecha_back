@@ -1,0 +1,9 @@
+FROM node:lts-slim as Develop
+
+WORKDIR /root/src
+
+COPY ./src/package.json .
+
+# RUN npm install --force --verbose
+
+# CMD ["npm", "run", "dev"]
