@@ -99,5 +99,11 @@ services:
             interval: 5s
             timeout: 10s
             retries: 5
+    redis:
+        hostname: redis
+        image: redis:latest
+        restart: always
+        ports:
+            - 6379:6379
 volumes:
     dbdata:
