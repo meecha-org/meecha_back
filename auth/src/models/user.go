@@ -111,3 +111,12 @@ func DeleteUser(userid string) error {
 
 	return dbconn.Unscoped().Delete(user).Error
 }
+
+// ユーザー名で検索
+func SearchUserByName(name string) ([]User, error) {
+	var users []User
+
+	// 取得する
+	err := dbconn.Where(&User{Name: name}).Find(&users).Error
+	return users, err
+}

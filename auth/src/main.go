@@ -1,6 +1,7 @@
 package main
 
 import (
+	"auth/grpc"
 	"auth/models"
 	"auth/oauth2"
 	"auth/services"
@@ -19,6 +20,9 @@ func Init() {
 
 	// goth 初期化
 	oauth2.InitGothic()
+
+	// GRPC 初期化
+	go grpc.RunServer()
 }
 
 func main() {

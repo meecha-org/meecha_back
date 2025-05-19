@@ -22,6 +22,9 @@ func main() {
 	// grpc 初期化
 	grpc.Init()
 
+	// ミドルウェア初期化
+	middlewares.Init()
+
 	// ルーター
 	router := echo.New()
 
@@ -33,13 +36,13 @@ func main() {
 		return ctx.JSON(http.StatusOK, echo.Map{
 			"result": "hello world",
 		})
-	}, middlewares.PocketAuth())
+	}, middlewares.RequireAuth)
 
 	// フレンドグループ
 	friendg := router.Group("/friend")
 	{
 		// ミドルウェア設定
-		friendg.Use(middlewares.PocketAuth())
+		friendg.Use(middlewares.RequireAuth)
 
 		// 検索するエンドポイント
 		friendg.POST("/search",controllers.SearchUser)

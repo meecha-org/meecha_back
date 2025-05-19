@@ -17,6 +17,9 @@ func main() {
 
 	// サービス初期化
 	services.Init()
+
+	// ミドルウェア初期化
+	middlewares.Init()
 	
 	// ルーター
 	router := echo.New()
@@ -29,10 +32,10 @@ func main() {
 		return ctx.JSON(http.StatusOK, echo.Map{
 			"result": "hello world",
 		})
-	}, middlewares.PocketAuth())
+	}, middlewares.RequireAuth)
 
 	// 位置情報をポストする関数
-	router.POST("/update",controllers.UpdateLocation,middlewares.PocketAuth())
+	router.POST("/update",controllers.UpdateLocation,middlewares.RequireAuth)
 
 	router.Logger.Fatal(router.Start(":8090"))
 }

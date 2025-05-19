@@ -1,30 +1,25 @@
 package grpc
 
 import (
+	"auth/models"
 	"context"
 	"errors"
 	"log"
 	"net"
 	"os"
 
-	"github.com/pocketbase/dbx"
-	"github.com/pocketbase/pocketbase"
 	"google.golang.org/grpc"
 )
 
 var (
-	// アプリ
-	gApp = &pocketbase.PocketBase{}
-
 	// APIキー
 	apiKey = ""
 )
 
-func RunServer(app *pocketbase.PocketBase) {
+func RunServer() {
 	log.Print("Bind Grpc Server : " + os.Getenv("GRPC_ADDR"))
 
 	// グローバル変数に設定
-	gApp = app
 	apiKey = os.Getenv("GRPC_KEY")
 
 	// 9000番ポートでクライアントからのリクエストを受け付けるようにする
@@ -60,40 +55,29 @@ func (srpc *authServer) SearchByLabel(context.Context, *LabelSearchMessage) (*Se
 func (srpc *authServer) SearchByName(ctx context.Context, args *NameSearchMessage) (*SearchResult, error) {
 	// キーが無効な場合
 	if args.APIKEY != apiKey {
-		return &SearchResult{},errors.New("failed to valid key")
+		return &SearchResult{}, errors.New("failed to valid key")
 	}
 
-	users := []struct {
-		Id    string `db:"id" json:"id"`
-		Name  string `db:"name" json:"name"`
-	}{}
-
-	// 検索
-	err := gApp.DB().
-		Select("id", "name","labels").
-		From("users").
-		AndWhere(dbx.Like("name", args.Name)).
-		All(&users)
-	
-	// エラー処理
+	// ユーザーを検索
+	users, err := models.SearchUserByName(args.Name)
 	if err != nil {
-		return &SearchResult{},errors.New("failed to get user")
+		return &SearchResult{}, err
 	}
 
 	// ユーザーリスト
-	rUsers := []*User{}	
+	rUsers := []*User{}
 
 	// ユーザーデータを回す
 	for _, val := range users {
 
 		// リストに追加
-	    rUsers = append(rUsers, &User{
-			UserID:        val.Id,
-			UserName:      val.Name,
+		rUsers = append(rUsers, &User{
+			UserID:   val.UserID,
+			UserName: val.Name,
 		})
 	}
-	
+
 	return &SearchResult{
 		Users: rUsers,
-	},nil
+	}, nil
 }

@@ -63,6 +63,25 @@ services:
                 condition: service_healthy
             auth:
                 condition: service_started
+    # locationコンテナ
+    location:
+        hostname: location
+        build:
+            context: ./location
+            dockerfile: dockerfile
+            target: Develop
+        tty: true
+        env_file:
+            - ./openssl/jwtKeys/public.env
+            - ./config/location.env
+        volumes:
+            - ./location/src:/root/src
+        restart: always
+        depends_on:
+            mysql:
+                condition: service_healthy
+            auth:
+                condition: service_started
     # データベース
     mysql:
         hostname: db

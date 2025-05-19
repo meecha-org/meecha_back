@@ -142,6 +142,16 @@ class AuthBase {
         return null;
     }
 
+    async IsAuthed() {
+        const userData = await auth.GetInfo();
+
+        if (userData == null) {
+            return false;
+        }
+
+        return true;
+    }
+
     async Get(url,headers) {
         // header にトークンを追加
         headers.Authorization = await this.getToken();

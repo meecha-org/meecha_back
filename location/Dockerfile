@@ -8,6 +8,11 @@ RUN apt install -y git wget curl
 # 作業ディレクトリを設定
 WORKDIR /root/src
 
+# AIR のインストール
+RUN go install github.com/air-verse/air@latest
+
+CMD ["air", "-c", ".air.toml"]
+
 # リリース用
 FROM golang:1.23.6-bullseye as Release
 
