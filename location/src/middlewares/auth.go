@@ -30,7 +30,7 @@ func RequireAuth(next echo.HandlerFunc) echo.HandlerFunc {
 		// トークンを格納
 		ctx.Set("token", token)
 		// ユーザーIDを格納
-		ctx.Set("userID", claim.UserID)
+		ctx.Set("UserID", claim.UserID)
 
 		// 認証処理
 		return next(ctx)
