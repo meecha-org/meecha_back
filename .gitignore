@@ -14,3 +14,4 @@ dashboard/src/node_modules/
 dashboard/src/.next/
 auth/src/tmp/
 app/src/tmp/
+location/src/tmp/
