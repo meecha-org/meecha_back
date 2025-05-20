@@ -15,11 +15,12 @@ services:
     # 認証用コンテナ
     auth:
         hostname: auth
-        build:
-            context: ./auth
-            dockerfile: dockerfile
-            # target: Release
-            target: Develop
+        # build:
+        #     context: ./auth
+        #     dockerfile: dockerfile
+        #     # target: Release
+        #     target: Develop
+        image: mattuu0/authbase-auth
         tty: true
         stdin_open: true
         env_file:
@@ -27,6 +28,7 @@ services:
             - ./config/auth.env
         volumes:
             - ./auth/src:/root/src
+            - ./auth/icons:/assets/icons
         restart: always
         depends_on:
             mysql:
