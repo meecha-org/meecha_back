@@ -3,7 +3,7 @@ package main
 import (
 	"net/http"
 	"new-meecha/controllers"
-	"new-meecha/grpc"
+	"new-meecha/grpckit"
 	"new-meecha/middlewares"
 	"new-meecha/models"
 	rediscache "new-meecha/redis-cache"
@@ -20,7 +20,7 @@ func main() {
 	rediscache.Init()
 
 	// grpc 初期化
-	grpc.Init()
+	grpckit.Init()
 
 	// ミドルウェア初期化
 	middlewares.Init()

@@ -2,7 +2,7 @@ package services
 
 import (
 	"errors"
-	"new-meecha/grpc"
+	"new-meecha/grpckit"
 	"new-meecha/models"
 	rediscache "new-meecha/redis-cache"
 	"new-meecha/utils"
@@ -17,7 +17,7 @@ func SearchByName(name string) ([]SearchResult,error) {
 	utils.Println(name)
 
 	// 検索する
-	users,err := grpc.SearchByName(name)
+	searchResult,err := grpckit.SearchUser("",name)
 
 	// エラー処理
 	if err != nil {
@@ -26,11 +26,11 @@ func SearchByName(name string) ([]SearchResult,error) {
 
 	// 結果を変換
 	result := []SearchResult{}
-	for _, val := range users {
+	for _, val := range searchResult.Users {
 		// 結果に追加
 		result = append(result, SearchResult{
 			UserID: val.UserID,
-			Name:   val.UserName,
+			Name:   val.Name,
 		})
 	}
 
