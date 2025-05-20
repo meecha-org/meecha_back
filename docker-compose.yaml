@@ -18,8 +18,8 @@ services:
         # build:
         #     context: ./auth
         #     dockerfile: dockerfile
-        #     # target: Release
-        #     target: Develop
+        #     target: Release
+            # target: Develop
         image: mattuu0/authbase-auth
         tty: true
         stdin_open: true
