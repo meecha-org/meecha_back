@@ -15,9 +15,7 @@ services:
     # 認証用コンテナ
     auth:
         hostname: auth
-        image: mattuu0/authbase-auth
-        tty: true
-        stdin_open: true
+        image: mattuu0/authbase-auth:0.2
         env_file:
             - ./openssl/jwtKeys/private.env
             - ./config/auth.env
@@ -35,7 +33,7 @@ services:
         build:
             context: ./app
             dockerfile: dockerfile
-            target: Develop
+            # target: Develop
         tty: true
         env_file:
             - ./openssl/jwtKeys/public.env
@@ -55,8 +53,8 @@ services:
         build:
             context: ./location
             dockerfile: dockerfile
-            target: Develop
-        tty: true
+            # target: Develop
+        # tty: true
         env_file:
             - ./openssl/jwtKeys/public.env
             - ./config/location.env
@@ -68,7 +66,11 @@ services:
                 condition: service_healthy
             auth:
                 condition: service_started
-                
+            app:
+                condition: service_started
+            redis:
+                condition: service_started
+
     # データベース
     mysql:
         hostname: db
