@@ -2,6 +2,7 @@ package rediscache
 
 import (
 	"new-meecha/utils"
+	"os"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -13,8 +14,8 @@ var (
 func Init() {
 	// redis に接続
 	redisConn := redis.NewClient(&redis.Options{
-		Addr:     "redis:6379",
-		Password: "",
+		Addr:     os.Getenv("REDIS_HOST"),
+		Password: os.Getenv("REDIS_PASSWORD"),
 		DB:       0,
 		PoolSize: 1000,
 	})
