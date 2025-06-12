@@ -11,13 +11,13 @@ tasks:
     cmds:
       - docker compose down --remove-orphans --rmi all --volumes
     silent: true
-  
+
   # コンテナ落とす
   down:
     cmds:
       - docker compose down
     silent: true
-  
+
   # コンテナ起動
   up:
     cmds:
@@ -41,14 +41,14 @@ tasks:
       Database: authdb
       DBContainer: mysql
     silent: true
-  
+
   # データベースのリセット
   dbreset:
     cmds:
       - docker compose down mysql --volumes --remove-orphans
       - docker compose up mysql -d --build
     silent: true
-  
+
   # 初回セットアップ
   setup:
     cmds:
@@ -56,16 +56,12 @@ tasks:
       - task: up
       - task: dbreset
       # - task: dashb
-  # dashb:
-  #   cmds:
-  #     - docker compose exec dashboard npm i --verbose --force
-  #     - docker compose exec dashboard npm run build
-  #     - docker compose logs -f auth
+
   restart:
     cmds:
       - docker compose restart auth
       - docker compose restart app
-  
+
   genkey:
     cmds:
       - cmd: docker run --rm -it -v .\\openssl\\jwtKeys:/jwtkeys -v .\\nginx\\keys:/sslkeys {{.Build_Image}}

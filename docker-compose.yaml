@@ -32,7 +32,7 @@ services:
         hostname: app
         build:
             context: ./app
-            dockerfile: dockerfile
+            dockerfile: Dockerfile
             # target: Develop
         image: mattuu0/meecha-app:0.1
         tty: true
@@ -53,7 +53,7 @@ services:
         hostname: location
         build:
             context: ./location
-            dockerfile: dockerfile
+            dockerfile: Dockerfile
             # target: Develop
         image: mattuu0/meecha-location:0.1
         # tty: true
