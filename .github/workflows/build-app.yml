@@ -8,7 +8,7 @@ on:
       - '.github/workflows/**'
 jobs:
   build-app:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     timeout-minutes: 3
 
     permissions:
