@@ -4,7 +4,8 @@ on:
   push:
     branches: [ "develop" ]
     paths:
-      'location/**'
+      - 'location/**'
+      - '.github/workflows/**'
 
 jobs:
   build-location:

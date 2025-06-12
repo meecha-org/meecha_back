@@ -4,7 +4,8 @@ on:
   push:
     branches: [ "develop" ]
     paths:
-      'app/**'
+      - 'app/**'
+      - '.github/workflows/**'
 jobs:
   build-app:
     runs-on: ubuntu-latest
