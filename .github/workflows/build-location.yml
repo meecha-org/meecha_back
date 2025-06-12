@@ -12,7 +12,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 3
 
-
     permissions:
       contents: read
       packages: write
@@ -27,6 +26,14 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-          
-      - name: Build the Docker image
-        run:  docker build --push --tag ghcr.io/${{ github.repository }}/meecha-location:${{ github.sha }} ./location
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          platforms: linux/amd64,linux/arm64
+          push: true
+          file: ./location/dockerfile
+          tags: ghcr.io/${{ github.repository }}/meecha-location:${{ github.sha }}
