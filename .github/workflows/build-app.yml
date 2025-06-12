@@ -34,5 +34,5 @@ jobs:
         with:
           platforms: linux/amd64
           push: true
-          file: ./app/dockerfile
+          file: ./app/Dockerfile
           tags: ghcr.io/${{ github.repository }}/meecha-app:${{ github.sha }}
