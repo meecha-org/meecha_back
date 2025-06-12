@@ -10,4 +10,4 @@ const AuthedURL = "/statics/index.html";
 const DesktopURL = "/statics/desktop_show.html";
 
 // メイン画面のURL
-const MainURL = "https://dev-meecha.mattuu.com/statics/";
+const MainURL = "https://k8s-meecha.mattuu.com/statics/";
