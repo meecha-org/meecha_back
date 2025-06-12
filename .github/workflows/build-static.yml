@@ -35,5 +35,6 @@ jobs:
         with:
           platforms: linux/amd64
           push: true
+          context: ./nginx
           file: ./nginx/dockerfile
           tags: ghcr.io/${{ github.repository }}/meecha-static:${{ github.sha }}
