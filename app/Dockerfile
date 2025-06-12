@@ -24,7 +24,7 @@ COPY ./src /root/app
 
 # プロジェクトをビルド
 RUN go mod download
-RUN CGO_ENABLED=0 go build -x -o meecha_server .
+RUN CGO_ENABLED=0 go build -o meecha_server .
 
 # Now copy it into our base image.
 FROM gcr.io/distroless/static-debian12
