@@ -3,13 +3,13 @@ name: Build Static Container
 on:
   push:
     branches: [ "develop" ]
+    paths:
+      'nginx/**'
 
 jobs:
   build-location:
     runs-on: ubuntu-latest
     timeout-minutes: 3
-    paths:
-      'nginx/**'
 
     permissions:
       contents: read

@@ -3,13 +3,14 @@ name: Build Location Container
 on:
   push:
     branches: [ "develop" ]
+    paths:
+      'location/**'
 
 jobs:
   build-location:
     runs-on: ubuntu-latest
     timeout-minutes: 3
-    paths:
-      'location/**'
+
 
     permissions:
       contents: read

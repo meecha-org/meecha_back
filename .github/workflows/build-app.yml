@@ -3,13 +3,12 @@ name: Build App Container
 on:
   push:
     branches: [ "develop" ]
-
+    paths:
+      'app/**'
 jobs:
   build-app:
     runs-on: ubuntu-latest
     timeout-minutes: 3
-    paths:
-      'app/**'
 
     permissions:
       contents: read
