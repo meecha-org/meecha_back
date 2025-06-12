@@ -25,7 +25,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build the Docker image
-        run:  docker buildx build --push --tag ghcr.io/${{ github.repository }}/meecha-app --platform linux/amd64,linux/arm64 ./app
+        run:  docker build --push --tag ghcr.io/${{ github.repository }}/meecha-app ./app
 
   build-location:
     runs-on: ubuntu-latest
@@ -47,4 +47,4 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
           
       - name: Build the Docker image
-        run:  docker buildx build --push --tag ghcr.io/${{ github.repository }}/meecha-location --platform linux/amd64,linux/arm64 ./location
+        run:  docker build --push --tag ghcr.io/${{ github.repository }}/meecha-location ./location
