@@ -1,6 +1,6 @@
 # https://taskfile.dev
 
-version: '3'
+version: "3"
 
 vars:
   GREETING: Hello, World!
@@ -62,12 +62,17 @@ tasks:
       - docker compose restart auth
       - docker compose restart app
 
+  push:
+    cmds:
+      - docker buildx build --push --tag mattuu0/meecha-app --platform linux/amd64,linux/arm64 ./app
+      - docker buildx build --push --tag mattuu0/meecha-location --platform linux/amd64,linux/arm64 ./location
+
   genkey:
     cmds:
       - cmd: docker run --rm -it -v .\\openssl\\jwtKeys:/jwtkeys -v .\\nginx\\keys:/sslkeys {{.Build_Image}}
         platforms: [windows]
       - cmd: docker run --rm -it -v ./openssl/jwtKeys:/jwtkeys -v ./nginx/keys:/sslkeys {{.Build_Image}}
-        platforms: [linux,darwin]
+        platforms: [linux, darwin]
     vars:
       Build_Image:
         sh: docker build -q ./openssl
