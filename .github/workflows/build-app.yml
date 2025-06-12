@@ -27,4 +27,4 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build meecha app Docker image
-        run:  docker build --push --tag ghcr.io/${{ github.repository }}/meecha-app ./app
+        run:  docker build --push --tag ghcr.io/${{ github.repository }}/meecha-app:${{ github.sha }} ./app

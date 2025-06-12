@@ -28,4 +28,4 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
           
       - name: Build the Docker image
-        run:  docker build --push --tag ghcr.io/${{ github.repository }}/meecha-static ./nginx
+        run:  docker build --push --tag ghcr.io/${{ github.repository }}/meecha-static:${{ github.sha }} ./nginx
