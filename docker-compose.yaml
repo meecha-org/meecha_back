@@ -15,12 +15,12 @@ services:
     # 認証用コンテナ
     auth:
         hostname: auth
-        image: mattuu0/authbase-auth:0.2
+        image: mattuu0/authbase-auth:0.2.1
         env_file:
             - ./openssl/jwtKeys/private.env
             - ./config/auth.env
         volumes:
-            - ./auth/src:/root/src
+            # - ./auth/src:/root/src
             - ./auth/icons:/assets/icons
         restart: always
         depends_on:
