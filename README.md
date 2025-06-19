@@ -57,7 +57,7 @@ Docker を使用して簡単に開発環境を構築できます。
 7.  Google ログインの設定を行ってください。
 8.  ログインを試すには、以下のURLにアクセスしてください。
     ```
-    https://localhost:8350/auth/statics/
+    https://localhost:8350/statics/
     ```
 
 ---
