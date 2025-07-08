@@ -11,7 +11,7 @@ services:
             - ./nginx/configs:/etc/nginx/conf.d/
             - ./nginx/keys:/etc/nginx/keys
             - ./nginx/statics:/etc/nginx/static/statics
-    
+
     # 認証用コンテナ
     auth:
         hostname: auth
@@ -33,7 +33,7 @@ services:
         build:
             context: ./app
             dockerfile: Dockerfile
-            # target: Develop
+            target: Develop
         image: mattuu0/meecha-app:0.1
         tty: true
         env_file:
@@ -54,7 +54,7 @@ services:
         build:
             context: ./location
             dockerfile: Dockerfile
-            # target: Develop
+            target: Develop
         image: mattuu0/meecha-location:0.1
         # tty: true
         env_file:
