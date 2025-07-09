@@ -61,6 +61,7 @@ tasks:
     cmds:
       - docker compose restart auth
       - docker compose restart app
+      - docker compose restart location
 
   push:
     cmds:
