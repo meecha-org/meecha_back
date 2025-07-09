@@ -34,7 +34,6 @@ services:
             context: ./app
             dockerfile: Dockerfile
             target: Develop
-        image: mattuu0/meecha-app:0.1
         tty: true
         env_file:
             - ./openssl/jwtKeys/public.env
@@ -55,7 +54,6 @@ services:
             context: ./location
             dockerfile: Dockerfile
             target: Develop
-        image: mattuu0/meecha-location:0.1
         # tty: true
         env_file:
             - ./openssl/jwtKeys/public.env
