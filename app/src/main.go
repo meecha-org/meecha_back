@@ -71,7 +71,9 @@ func main() {
 		// リクエストをキャンセル
 		friendg.POST("/cancel",controllers.CancelRequest)
 	}
+
 	
+
 	// websocket 用
 	// router.GET("/ws", websocket.HandleWs)
 
