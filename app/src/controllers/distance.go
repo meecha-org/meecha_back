@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"net/http"
-	"new-meecha/logger"
 	"new-meecha/services"
 	"new-meecha/utils"
 
@@ -12,11 +11,12 @@ import (
 //設定距離取得
 func GetDistance(ctx echo.Context) error {
 	// ユーザー情報を取得 (送信者)
-	myid := ctx.Get("UserID").(string)
+	// myid := ctx.Get("UserID").(string)
+	myid := ctx.Request().Header.Get("UserID")
 
 	// 通知距離を取得
 	distance,err := services.GetDistance(myid)
-	logger.Println("aaa",distance,err)
+
 	// エラー処理
 	if err != nil {
 		utils.Println(err)
@@ -32,7 +32,8 @@ type DistanceArgs struct {
 
 func UpdateDistance(ctx echo.Context) error {
 	// ユーザー情報を取得 (送信者)
-	myid := ctx.Get("UserID").(string)
+	// myid := ctx.Get("UserID").(string)
+	myid := ctx.Request().Header.Get("UserID")
 
 	var args DistanceArgs
 	// リクエストをバインド
