@@ -1,13 +1,17 @@
 package models
 
-import "time"
+import (
+	"new-meecha/utils"
+	"time"
+)
 
 type Ignores struct {
-	Uid       string      //送信者ID
-	Latitude  float64 
-	Longitude float64 
-	Size      int64  
-	CreateAt  int64
+	IgnoreId  string  `gorm:"primaryKey"`   //範囲ID
+	Uid       string    					//ユーザーID
+	Latitude  float64 						//緯度
+	Longitude float64 						//経度
+	Size      int64  						//円のサイズ
+	CreateAt  int64							//作られた時間
 }
 
 type IgnoresArgs struct {
@@ -16,7 +20,6 @@ type IgnoresArgs struct {
 	Size      int64   `json:"Size"`
 }
 
-
 // uidに関連する除外ポイントを削除
 func RemoveIgnores(uid string) error {
 	return dbconn.Where(&Ignores{
@@ -24,13 +27,20 @@ func RemoveIgnores(uid string) error {
 	}).Unscoped().Delete(&Ignores{}).Error
 }
 
-
 // uidに関連する除外ポイントを登録
 func SaveIgnores(uid string,ignores []IgnoresArgs) error {
 	var ignoresRecords []Ignores
 
 	for _, ignores := range ignores {
+
+		//ignoreId生成
+		ignoreId,err := utils.Genid()
+		if err != nil {
+			return err
+		}
+
 		ignoresRecords = append(ignoresRecords, Ignores{
+			IgnoreId:  ignoreId,
 			Uid:       uid,
 			Latitude:  ignores.Latitude,
 			Longitude: ignores.Longitude,
