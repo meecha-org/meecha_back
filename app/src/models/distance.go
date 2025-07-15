@@ -11,6 +11,18 @@ type Distance struct{
 	UpdatedAt int64   //更新時間 (UnixTime)
 }
 
-func getdistance(){
-	return
+func GetDistance(uid string)(int64,error){
+	request := Distance{} 
+
+	// データベースから取得
+	result := dbconn.Where(&Distance{
+		UserId:    uid,
+	}).First(&request)
+
+	// エラー処理
+	if result.Error != nil {
+		return 0, result.Error
+	}
+
+	return request.Distance, nil
 }

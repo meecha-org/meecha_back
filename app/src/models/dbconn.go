@@ -34,6 +34,7 @@ func Init() {
 	// マイグレーション
 	db.AutoMigrate(&FriendRequest{})
 	db.AutoMigrate(&Friend{})
+	db.AutoMigrate(&Distance{})
 
 	// グローバル変数に格納
 	dbconn = db
