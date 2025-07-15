@@ -1,14 +1,13 @@
 package models
 
-import (
-
-)
+import "time"
 
 type Ignores struct {
 	Uid       string      //送信者ID
 	Latitude  float64 
 	Longitude float64 
 	Size      int64  
+	CreateAt  int64
 }
 
 type IgnoresArgs struct {
@@ -16,7 +15,6 @@ type IgnoresArgs struct {
 	Longitude float64 `json:"Longitude"`
 	Size      int64   `json:"Size"`
 }
-
 
 
 // uidに関連する除外ポイントを削除
@@ -37,6 +35,7 @@ func SaveIgnores(uid string,ignores []IgnoresArgs) error {
 			Latitude:  ignores.Latitude,
 			Longitude: ignores.Longitude,
 			Size:      ignores.Size,
+			CreateAt:  time.Now().Unix(),
 		})
 	}
 
