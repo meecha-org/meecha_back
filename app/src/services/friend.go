@@ -3,6 +3,7 @@ package services
 import (
 	"errors"
 	"new-meecha/grpckit"
+	"new-meecha/logger"
 	"new-meecha/models"
 	rediscache "new-meecha/redis-cache"
 	"new-meecha/utils"
@@ -13,15 +14,15 @@ type SearchResult struct {
 	Name   string `json:"name"`
 }
 
-func SearchByName(name string) ([]SearchResult,error) {
+func SearchByName(name string) ([]SearchResult, error) {
 	utils.Println(name)
 
 	// 検索する
-	searchResult,err := grpckit.SearchUser("",name)
+	searchResult, err := grpckit.SearchUser("", name)
 
 	// エラー処理
 	if err != nil {
-		return []SearchResult{},err
+		return []SearchResult{}, err
 	}
 
 	// 結果を変換
@@ -34,10 +35,10 @@ func SearchByName(name string) ([]SearchResult,error) {
 		})
 	}
 
-	return result,nil
+	return result, nil
 }
 
-func SendFriendRequest(myId,targetId string) error {
+func SendFriendRequest(myId, targetId string) error {
 	// 自分が関わるリクエスト取得
 	_, err := models.GetFriend(models.FriendArgs{
 		UserID:   myId,
@@ -58,17 +59,17 @@ func SendFriendRequest(myId,targetId string) error {
 
 type FriendRequest struct {
 	RequestID string `json:"id"`
-	SenderID string	`json:"sender"`
-	TargetID string `json:"target"`
+	SenderID  string `json:"sender"`
+	TargetID  string `json:"target"`
 }
 
-func GetSentRequest(userid string) ([]FriendRequest,error) {
+func GetSentRequest(userid string) ([]FriendRequest, error) {
 	// 送信済みを取得
-	GetRequests,err := models.GetSentRequest(userid)
+	GetRequests, err := models.GetSentRequest(userid)
 
 	// エラー処理
 	if err != nil {
-		return []FriendRequest{},err
+		return []FriendRequest{}, err
 	}
 
 	// 返すリクエスト
@@ -83,17 +84,17 @@ func GetSentRequest(userid string) ([]FriendRequest,error) {
 		})
 	}
 
-	return requests,nil
+	return requests, nil
 }
 
 // 受信済みを取得
-func GetRecvedRequest(userid string) ([]FriendRequest,error) {
+func GetRecvedRequest(userid string) ([]FriendRequest, error) {
 	// 送信済みを取得
-	GetRequests,err := models.GetRecvedRequest(userid)
+	GetRequests, err := models.GetRecvedRequest(userid)
 
 	// エラー処理
 	if err != nil {
-		return []FriendRequest{},err
+		return []FriendRequest{}, err
 	}
 
 	// 返すリクエスト
@@ -108,11 +109,11 @@ func GetRecvedRequest(userid string) ([]FriendRequest,error) {
 		})
 	}
 
-	return requests,nil
+	return requests, nil
 }
 
 // 承認する
-func AcceptRequest(requestId string,myId string) error {
+func AcceptRequest(requestId string, myId string) error {
 	// リクエストを取得
 	request, err := models.GetRequestByID(requestId)
 
@@ -156,7 +157,7 @@ func AcceptRequest(requestId string,myId string) error {
 	return models.RemoveRequest(requestId)
 }
 
-func RejectRequest(myid,requestId string) error {
+func RejectRequest(myid, requestId string) error {
 	// リクエストを取得
 	request, err := models.GetRequestByID(requestId)
 
@@ -174,21 +175,46 @@ func RejectRequest(myid,requestId string) error {
 	return models.RemoveRequest(requestId)
 }
 
-func GetFriendList(userid string) ([]string,error) {
+// フレンドのデータ
+type Friend struct {
+	Name   string `json:"name"` // ユーザー名
+	UserID string `json:"id"`   // ユーザーID
+}
+
+func GetFriendList(userid string) ([]Friend, error) {
 	// キャッシュから取得
-	cached,err := rediscache.GetCacheFriend(userid)
+	cached, err := rediscache.GetCacheFriend(userid)
 
 	// 成功したとき
 	if err == nil {
-		return cached.FriendIds,nil
+		returnFriends := []Friend{}
+
+		// フレンドIDを回す
+		for _, friend := range cached.FriendIds {
+			// ユーザー情報を取得
+			user, err := grpckit.GetUser(friend)
+
+			// エラー処理
+			if err != nil {
+				logger.PrintErr(err)
+				continue
+			}
+
+			// フレンド情報を追加
+			returnFriends = append(returnFriends, Friend{
+				Name:   user.Name,
+				UserID: user.UserID,
+			})
+		}
+		return returnFriends, nil
 	}
 
 	// フレンドリストを取得
-	friends,err := models.GetFriendList(userid)
+	friends, err := models.GetFriendList(userid)
 
 	// エラー処理
 	if err != nil {
-		return []string{},err
+		return []Friend{}, err
 	}
 
 	// キャッシュに保存
@@ -200,11 +226,32 @@ func GetFriendList(userid string) ([]string,error) {
 		utils.Println(err)
 	}
 
-	return friends,nil
+	// フレンド情報を返す
+	returnFriends := []Friend{}
+
+	// フレンドIDを回す
+	for _, friend := range friends {
+		// ユーザー情報を取得
+		user, err := grpckit.GetUser(friend)
+
+		// エラー処理
+		if err != nil {
+			logger.Println(err)
+			continue
+		}
+
+		// フレンド情報を追加
+		returnFriends = append(returnFriends, Friend{
+			Name:   user.Name,
+			UserID: user.UserID,
+		})
+	}
+
+	return returnFriends, nil
 }
 
 // フレンド削除する関数
-func RemoveFriend(userid string,targetid string) error {
+func RemoveFriend(userid string, targetid string) error {
 	// フレンド取得
 	friend, err := models.GetFriend(models.FriendArgs{
 		UserID:   userid,
@@ -249,7 +296,7 @@ func RemoveFriend(userid string,targetid string) error {
 // ユーザーのフレンドをキャッシュする
 func CacheFriend(userid string) error {
 	// フレンドリストを取得
-	friends,err := models.GetFriendList(userid)
+	friends, err := models.GetFriendList(userid)
 
 	// エラー処理
 	if err != nil {
@@ -263,7 +310,7 @@ func CacheFriend(userid string) error {
 
 	// キャッシュに保存
 	err = rediscache.AddCacheFriend(rediscache.CacheFriendArgs{
-		UserID:   userid,
+		UserID: userid,
 		Data: rediscache.FriendCache{
 			FriendIds: friends,
 		},
@@ -278,7 +325,7 @@ func CacheFriend(userid string) error {
 }
 
 // 送信済みリクエストをキャンセルする
-func CancelRequest(myid,requestId string) error {
+func CancelRequest(myid, requestId string) error {
 	// リクエストを取得
 	request, err := models.GetRequestByID(requestId)
 
