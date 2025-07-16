@@ -2,16 +2,21 @@ package services
 
 import (
 	"context"
+	"errors"
+	"location/models"
 	redisfriend "location/redis-friend"
 	"location/utils"
 	"slices"
 
 	"github.com/redis/go-redis/v9"
+	"gorm.io/gorm"
 )
 
 const (
-	geoKey = "meecha_geo"
+	geoKey       = "meecha_geo"
 	geoExpiryKey = "meecha_geo_expiry"
+
+	DefaultDistance = 3000 //設定されていない時の初期値 (3km)
 )
 
 type Location struct {
@@ -53,10 +58,19 @@ func UpdateLocation(args Location) (NearResponse, error) {
 		return NearResponse{}, err
 	}
 
+	// 自身の設定距離を取得
+	distance, err := GetUserSetDistance(args.UserID)
+
+	// エラー処理
+	if err != nil {
+		utils.Println(err)
+		return NearResponse{}, err
+	}
+
 	// 半径5キロ以内のユーザー取得
 	nearUsers, err := conn.GeoRadius(context.Background(), geoKey, args.Longitude, args.Latitude, &redis.GeoRadiusQuery{
-		Radius:    5,
-		Unit:      "km",
+		Radius:    float64(distance),
+		Unit:      "m",
 		WithCoord: true,
 		WithDist:  true,
 	}).Result()
@@ -86,6 +100,21 @@ func UpdateLocation(args Location) (NearResponse, error) {
 			continue
 		}
 
+		// フレンドの場合相手のせって情報を取得
+		anotherDistance, err := GetUserSetDistance(targetId)
+
+		// エラー処理
+		if err != nil {
+			utils.Println(err)
+			continue
+		}
+
+		// 相手の距離と比較
+		if user.Dist > float64(anotherDistance) {
+			// 自分の距離より遠い場合
+			continue
+		}
+
 		// 返すリストに追加
 		retuurnFriends = append(retuurnFriends, NearFriend{
 			UserID:    user.Name,
@@ -112,28 +141,28 @@ func UpdateLocation(args Location) (NearResponse, error) {
 		// エラー処理
 		if err != nil {
 			utils.Println(err)
-			return NearResponse{},err
+			return NearResponse{}, err
 		}
-		
+
 		// データを返す
 		return NearResponse{
 			Removed:     []string{},
 			NearFriends: retuurnFriends,
-		},nil
+		}, nil
 	}
 
 	// キャッシュが存在する時
 	// キャッシュを取得
-	lastCached,err := GetCachedLocation(args.UserID)
+	lastCached, err := GetCachedLocation(args.UserID)
 
 	// エラー処理
 	if err != nil {
 		utils.Println(err)
-		return NearResponse{},err
+		return NearResponse{}, err
 	}
 
 	// 範囲から外れたフレンドを取得
-	nearRemoved := findRemovedElements(lastCached.LastNearFriends,NearFriendIds)
+	nearRemoved := findRemovedElements(lastCached.LastNearFriends, NearFriendIds)
 
 	// キャッシュを更新
 	err = SetCacheLocation(LocationCache{
@@ -147,6 +176,8 @@ func UpdateLocation(args Location) (NearResponse, error) {
 		NearFriends: retuurnFriends,
 	}, err
 }
+
+
 
 // 配列から消えた要素を取得する
 func findRemovedElements(original []string, updated []string) []string {
@@ -186,7 +217,7 @@ func GeoSave(args Location) error {
 	nowTime := utils.NowTime()
 
 	// キャッシュを保存
-	return conn.ZAdd(context.Background(),geoExpiryKey,redis.Z{
+	return conn.ZAdd(context.Background(), geoExpiryKey, redis.Z{
 		Score:  float64(nowTime + 5),
 		Member: args.UserID,
 	}).Err()
@@ -197,7 +228,7 @@ func RemoveExpiryGeo() error {
 	nowTime := utils.NowTime()
 
 	// 有効期限のデータを取得
-	expired,err := conn.ZRangeArgs(context.Background(),redis.ZRangeArgs{
+	expired, err := conn.ZRangeArgs(context.Background(), redis.ZRangeArgs{
 		Key:     geoExpiryKey,
 		Start:   nil,
 		Stop:    nowTime,
@@ -214,7 +245,7 @@ func RemoveExpiryGeo() error {
 	// 古いキーを削除
 	for _, val := range expired {
 		// 位置情報を削除
-		err := conn.ZRem(context.Background(),geoKey,val).Err()
+		err := conn.ZRem(context.Background(), geoKey, val).Err()
 
 		// エラー処理
 		if err != nil {
@@ -224,7 +255,7 @@ func RemoveExpiryGeo() error {
 		}
 
 		// 有効期限一覧から削除
-		err = conn.ZRem(context.Background(),geoExpiryKey,val).Err()
+		err = conn.ZRem(context.Background(), geoExpiryKey, val).Err()
 
 		// エラー処理
 		if err != nil {
@@ -235,4 +266,21 @@ func RemoveExpiryGeo() error {
 	}
 
 	return nil
+}
+
+
+//現在の距離を取得
+func GetUserSetDistance(uid string) (int64,error){
+	//設定した距離を取得
+	distance,err := models.GetDistance(uid)
+	
+	//設定がなかった時
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return DefaultDistance,nil
+	}
+
+	if err != nil {
+		return 0,err
+	}
+	return distance,nil
 }
