@@ -492,39 +492,31 @@ get_friends_button.addEventListener("click", async function (evt) {
         // json に変換
         const result = await req.json();
 
-        result.forEach(async function(userid) {
-            // ユーザー情報を取得
-            const req = await fetch("/auth/info/" + userid,{
-                method: "GET"
-            });
-
-            // jsonにする
-            const uinfo = await req.json();
-
+        result.forEach(async function(data) {
             // フレンドリクエストを作成
             const friendDiv = document.createElement('div');
             friendDiv.className = "friend_data_area";
-            friendDiv.id = userid;
+            friendDiv.id = data["id"];
 
             // アイコン
             const iconElement = document.createElement('img');
-            iconElement.src = GetIcon(userid); // アイコンのURLを設定
+            iconElement.src = GetIcon(data["id"]); // アイコンのURLを設定
             iconElement.className = "user_icon";
 
             // ユーザー名
             const nameElement = document.createElement('p');
             nameElement.className = "username_area";
-            nameElement.textContent = uinfo["name"]; // ユーザー名を設定
+            nameElement.textContent = data["name"]; // ユーザー名を設定
 
             // ボタン要素を作成
             const buttonElement = document.createElement('button');
             buttonElement.className = "friend_btn";
-            buttonElement.id = userid; // ボタンのIDを設定
+            buttonElement.id = data["id"]; // ボタンのIDを設定
             buttonElement.textContent = "取り消し"; // ボタンのテキストを設定
             buttonElement.addEventListener("click", async function (evt) {
                 try {
                     // フレンドを削除
-                    if (await DeleteFriend(userid)) {
+                    if (await DeleteFriend(data["id"])) {
                         ShowNotify("削除しました");
                     } else {
                         throw "削除に失敗しました";
@@ -545,7 +537,7 @@ get_friends_button.addEventListener("click", async function (evt) {
 
             friends_show_area.appendChild(friendDiv);
 
-            console.log(uinfo["name"]);
+            console.log(data["name"]);
         });
 
         // メッセージを表示
