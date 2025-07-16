@@ -7,7 +7,7 @@ on:
       - 'app/**'
       - '.github/workflows/**'
 jobs:
-  build-location:
+  build-app:
     runs-on: ubuntu-latest
     timeout-minutes: 3
 
