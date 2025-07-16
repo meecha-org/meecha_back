@@ -3,6 +3,7 @@ package models
 import (
 	"log"
 	"os"
+
 	// "os"
 
 	// "gorm.io/driver/sqlite"
@@ -21,7 +22,7 @@ func Init() {
 	// dsn := "root:root@tcp(mysql:3306)/meecha?charset=utf8mb4&parseTime=True&loc=Local"
 	// db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	// db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	
+
 	// データベースの接続情報
 	dsn := os.Getenv("DATABASE_DSN")
 
@@ -35,6 +36,7 @@ func Init() {
 	db.AutoMigrate(&FriendRequest{})
 	db.AutoMigrate(&Friend{})
 	db.AutoMigrate(&Distance{})
+	db.AutoMigrate(&Ignores{})
 
 	// グローバル変数に格納
 	dbconn = db

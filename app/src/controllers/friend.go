@@ -27,7 +27,7 @@ func SearchUser(ctx echo.Context) error {
 	}
 
 	// 検索する
-	result,err := services.SearchByName(args.UserName)
+	result, err := services.SearchByName(args.UserName)
 
 	// エラー処理
 	if err != nil {
@@ -35,11 +35,11 @@ func SearchUser(ctx echo.Context) error {
 		return ctx.NoContent(http.StatusInternalServerError)
 	}
 
-	return ctx.JSON(http.StatusOK,result)
+	return ctx.JSON(http.StatusOK, result)
 }
 
 type RequestArgs struct {
-	UserID string `json:"userid"`
+	UserID    string `json:"userid"`
 	RequestID string `json:"requestid"`
 }
 
@@ -66,7 +66,7 @@ func FriendRequest(ctx echo.Context) error {
 	}
 
 	// リクエストを作成する
-	err := services.SendFriendRequest(myid,args.UserID)
+	err := services.SendFriendRequest(myid, args.UserID)
 
 	// エラー処理
 	if err != nil {
@@ -82,7 +82,7 @@ func GetSentRequest(ctx echo.Context) error {
 	myid := ctx.Get("UserID").(string)
 
 	// リクエストを取得
-	requests,err := services.GetSentRequest(myid)
+	requests, err := services.GetSentRequest(myid)
 
 	// エラー処理
 	if err != nil {
@@ -90,7 +90,7 @@ func GetSentRequest(ctx echo.Context) error {
 		return ctx.NoContent(http.StatusConflict)
 	}
 
-	return ctx.JSON(http.StatusOK,requests)
+	return ctx.JSON(http.StatusOK, requests)
 }
 
 // 受信済みを取得する
@@ -99,7 +99,7 @@ func RecvedRequest(ctx echo.Context) error {
 	myid := ctx.Get("UserID").(string)
 
 	// リクエストを取得
-	requests,err := services.GetRecvedRequest(myid)
+	requests, err := services.GetRecvedRequest(myid)
 
 	// エラー処理
 	if err != nil {
@@ -107,7 +107,7 @@ func RecvedRequest(ctx echo.Context) error {
 		return ctx.NoContent(http.StatusConflict)
 	}
 
-	return ctx.JSON(http.StatusOK,requests)
+	return ctx.JSON(http.StatusOK, requests)
 }
 
 func AcceptRequest(ctx echo.Context) error {
@@ -122,7 +122,7 @@ func AcceptRequest(ctx echo.Context) error {
 	}
 
 	// リクエストを取得
-	err := services.AcceptRequest(args.RequestID,myid)
+	err := services.AcceptRequest(args.RequestID, myid)
 
 	// エラー処理
 	if err != nil {
@@ -145,7 +145,7 @@ func RejectRequest(ctx echo.Context) error {
 	myid := ctx.Get("UserID").(string)
 
 	// リクエストを取得
-	err := services.RejectRequest(myid,args.RequestID)
+	err := services.RejectRequest(myid, args.RequestID)
 
 	// エラー処理
 	if err != nil {
@@ -161,7 +161,7 @@ func GetFriendList(ctx echo.Context) error {
 	myid := ctx.Get("UserID").(string)
 
 	// フレンドリストを取得
-	friends,err := services.GetFriendList(myid)
+	friends, err := services.GetFriendList(myid)
 
 	// エラー処理
 	if err != nil {
@@ -169,12 +169,13 @@ func GetFriendList(ctx echo.Context) error {
 		return ctx.NoContent(http.StatusConflict)
 	}
 
-	return ctx.JSON(http.StatusOK,friends)
+	return ctx.JSON(http.StatusOK, friends)
 }
 
 type RemoveArgs struct {
 	UserID string `json:"userid"`
 }
+
 func RemoveFriend(ctx echo.Context) error {
 	// bind
 	var args RemoveArgs
@@ -187,7 +188,7 @@ func RemoveFriend(ctx echo.Context) error {
 	myid := ctx.Get("UserID").(string)
 
 	// リクエストを取得
-	err := services.RemoveFriend(myid,args.UserID)
+	err := services.RemoveFriend(myid, args.UserID)
 
 	// エラー処理
 	if err != nil {
@@ -210,7 +211,7 @@ func CancelRequest(ctx echo.Context) error {
 	myid := ctx.Get("UserID").(string)
 
 	// リクエストを取得
-	err := services.CancelRequest(myid,args.RequestID)
+	err := services.CancelRequest(myid, args.RequestID)
 
 	// エラー処理
 	if err != nil {
