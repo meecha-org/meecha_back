@@ -11,8 +11,8 @@ import (
 //設定距離取得
 func GetDistance(ctx echo.Context) error {
 	// ユーザー情報を取得 (送信者)
-	// myid := ctx.Get("UserID").(string)
-	myid := ctx.Request().Header.Get("UserID")
+	myid := ctx.Get("UserID").(string)
+	// myid := ctx.Request().Header.Get("UserID")
 
 	// 通知距離を取得
 	distance,err := services.GetDistance(myid)
@@ -23,7 +23,9 @@ func GetDistance(ctx echo.Context) error {
 		return ctx.NoContent(http.StatusConflict)
 	}
 
-	return ctx.JSON(http.StatusOK,distance)
+	return ctx.JSON(http.StatusOK,DistanceArgs{
+		Distance: distance,
+	})
 }
 
 type DistanceArgs struct {
@@ -32,8 +34,8 @@ type DistanceArgs struct {
 
 func UpdateDistance(ctx echo.Context) error {
 	// ユーザー情報を取得 (送信者)
-	// myid := ctx.Get("UserID").(string)
-	myid := ctx.Request().Header.Get("UserID")
+	myid := ctx.Get("UserID").(string)
+	//myid := ctx.Request().Header.Get("UserID")
 
 	var args DistanceArgs
 	// リクエストをバインド
