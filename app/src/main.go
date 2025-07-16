@@ -83,17 +83,6 @@ func main() {
 		notifyg.POST("/ignores",controllers.UpdateIgnores)
 
 		notifyg.GET("/ignores",controllers.GetIgnores)
-		
-
-	}
-
-
-
-
-	notifyg := router.Group("/notify")
-	{
-		// ミドルウェア設定
-		notifyg.Use(middlewares.RequireAuth)
 
 		//通知距離更新
 		notifyg.POST("/distance",controllers.UpdateDistance)
