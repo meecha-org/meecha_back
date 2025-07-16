@@ -77,7 +77,7 @@ func main() {
 	notifyg := router.Group("/notify")
 	{
 		// ミドルウェア設定
-		notifyg.Use(middlewares.RequireAuth)
+		// notifyg.Use(middlewares.RequireAuth)
 
 		//除外ポイント設定
 		notifyg.POST("/ignores",controllers.UpdateIgnores)

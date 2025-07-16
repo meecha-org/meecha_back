@@ -1,20 +1,25 @@
 package services
 
-import "new-meecha/models"
-
-// "errors"
-// "new-meecha/grpckit"
-// "new-meecha/models"
-// rediscache "new-meecha/redis-cache"
-// "new-meecha/utils"
+import (
+	"errors"
+	"new-meecha/models"
+	"slices"
+)
 
 //除外ポイントの作成、更新
 func UpdateIgnores(myid string,args []models.IgnoresArgs) error {
+	for _, arg := range args {
+		if !slices.Contains(ValidationList, arg.Size) {
+			return errors.New("InvalidDistance")
+		}
+    }
+	
 	//myidに関連する除外ポイントを削除
 	err := models.RemoveIgnores(myid)
 	if err != nil {
 		return err
 	}
+
 	if args != nil {
 		//送られてきたポイントを登録する
 		err = models.SaveIgnores(myid,args)
@@ -22,8 +27,6 @@ func UpdateIgnores(myid string,args []models.IgnoresArgs) error {
 			return err
 		}
 	}
-
-
 
 	return nil
 }
