@@ -77,7 +77,7 @@ func main() {
 	notifyg := router.Group("/notify")
 	{
 		// ミドルウェア設定
-		// notifyg.Use(middlewares.RequireAuth)
+		notifyg.Use(middlewares.RequireAuth)
 
 		//除外ポイント設定
 		notifyg.POST("/ignores",controllers.UpdateIgnores)
@@ -89,7 +89,22 @@ func main() {
 
 
 
+
+	notifyg := router.Group("/notify")
+	{
+		// ミドルウェア設定
+		notifyg.Use(middlewares.RequireAuth)
+
+		//通知距離更新
+		notifyg.POST("/distance",controllers.UpdateDistance)
+		//通知距離取得
+		notifyg.GET("/distance",controllers.GetDistance)
+		
+
+	}
+
 	
+
 	// websocket 用
 	// router.GET("/ws", websocket.HandleWs)
 
