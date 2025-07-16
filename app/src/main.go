@@ -38,6 +38,7 @@ func main() {
 		})
 	}, middlewares.RequireAuth)
 
+
 	// フレンドグループ
 	friendg := router.Group("/friend")
 	{
@@ -71,6 +72,23 @@ func main() {
 		// リクエストをキャンセル
 		friendg.POST("/cancel",controllers.CancelRequest)
 	}
+
+
+	notifyg := router.Group("/notify")
+	{
+		// ミドルウェア設定
+		// notifyg.Use(middlewares.RequireAuth)
+
+		//除外ポイント設定
+		notifyg.POST("/ignores",controllers.UpdateIgnores)
+
+		notifyg.GET("/ignores",controllers.GetIgnores)
+		
+
+	}
+
+
+
 	
 	// websocket 用
 	// router.GET("/ws", websocket.HandleWs)
