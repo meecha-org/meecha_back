@@ -58,9 +58,11 @@ func SendFriendRequest(myId, targetId string) error {
 }
 
 type FriendRequest struct {
-	RequestID string `json:"id"`
-	SenderID  string `json:"sender"`
-	TargetID  string `json:"target"`
+	RequestID  string `json:"id"`
+	SenderID   string `json:"sender"`
+	SenderName string `json:"senderName"`
+	TargetID   string `json:"target"`
+	TargetName string `json:"targetName"`
 }
 
 func GetSentRequest(userid string) ([]FriendRequest, error) {
@@ -72,15 +74,34 @@ func GetSentRequest(userid string) ([]FriendRequest, error) {
 		return []FriendRequest{}, err
 	}
 
+	// 自身のユーザー情報を取得
+	user, err := grpckit.GetUser(userid)
+
+	// エラー処理
+	if err != nil {
+		return []FriendRequest{}, err
+	}
+
 	// 返すリクエスト
 	requests := []FriendRequest{}
 
 	for _, request := range GetRequests {
+		// 相手のユーザー情報を取得
+		targetUser, err := grpckit.GetUser(request.TargetID)
+
+		// エラー処理
+		if err != nil {
+			logger.PrintErr(err)
+			continue
+		}
+
 		// リクエストを変換
 		requests = append(requests, FriendRequest{
-			RequestID: request.RequestID,
-			SenderID:  request.SenderID,
-			TargetID:  request.TargetID,
+			RequestID:  request.RequestID,
+			SenderID:   request.SenderID,
+			SenderName: user.Name,
+			TargetID:   request.TargetID,
+			TargetName: targetUser.Name,
 		})
 	}
 
@@ -97,15 +118,34 @@ func GetRecvedRequest(userid string) ([]FriendRequest, error) {
 		return []FriendRequest{}, err
 	}
 
+	// 自身のユーザー情報を取得
+	user, err := grpckit.GetUser(userid)
+
+	// エラー処理
+	if err != nil {
+		return []FriendRequest{}, err
+	}
+
 	// 返すリクエスト
 	requests := []FriendRequest{}
 
 	for _, request := range GetRequests {
+		// 送信元のユーザー情報を取得
+		senderUser, err := grpckit.GetUser(request.SenderID)
+
+		// エラー処理
+		if err != nil {
+			logger.PrintErr(err)
+			continue
+		}
+
 		// リクエストを変換
 		requests = append(requests, FriendRequest{
-			RequestID: request.RequestID,
-			SenderID:  request.SenderID,
-			TargetID:  request.TargetID,
+			RequestID:  request.RequestID,
+			SenderID:   request.SenderID,
+			SenderName: senderUser.Name,
+			TargetID:   request.TargetID,
+			TargetName: user.Name,
 		})
 	}
 
