@@ -2,6 +2,7 @@ package main
 
 import (
 	"location/controllers"
+	"location/grpckit"
 	"location/middlewares"
 	redisfriend "location/redis-friend"
 	"location/services"
@@ -20,6 +21,9 @@ func main() {
 
 	// ミドルウェア初期化
 	middlewares.Init()
+
+	// GRPC 初期化
+	grpckit.Init()
 	
 	// ルーター
 	router := echo.New()
