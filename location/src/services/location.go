@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"errors"
+	"location/grpckit"
 	"location/models"
 	redisfriend "location/redis-friend"
 	"location/utils"
@@ -33,6 +34,7 @@ type NearResponse struct {
 
 type NearFriend struct {
 	UserID    string  `json:"userid"`    //相手のユーザーID
+	Name      string  `json:"name"`      //ユーザー名
 	Latitude  float64 `json:"latitude"`  // 緯度
 	Longitude float64 `json:"longitude"` // 経度
 	Dist      float64 `json:"dist`       //距離
@@ -115,9 +117,19 @@ func UpdateLocation(args Location) (NearResponse, error) {
 			continue
 		}
 
+		// ユーザーの情報を取得する
+		nearUser, err := grpckit.GetUser(targetId)
+
+		// エラー処理
+		if err != nil {
+			utils.Println(err)
+			continue
+		}
+
 		// 返すリストに追加
 		retuurnFriends = append(retuurnFriends, NearFriend{
 			UserID:    user.Name,
+			Name:      nearUser.Name,
 			Latitude:  user.Latitude,
 			Longitude: user.Longitude,
 			Dist:      user.Dist,
@@ -176,8 +188,6 @@ func UpdateLocation(args Location) (NearResponse, error) {
 		NearFriends: retuurnFriends,
 	}, err
 }
-
-
 
 // 配列から消えた要素を取得する
 func findRemovedElements(original []string, updated []string) []string {
@@ -268,19 +278,18 @@ func RemoveExpiryGeo() error {
 	return nil
 }
 
-
-//現在の距離を取得
-func GetUserSetDistance(uid string) (int64,error){
+// 現在の距離を取得
+func GetUserSetDistance(uid string) (int64, error) {
 	//設定した距離を取得
-	distance,err := models.GetDistance(uid)
-	
+	distance, err := models.GetDistance(uid)
+
 	//設定がなかった時
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return DefaultDistance,nil
+		return DefaultDistance, nil
 	}
 
 	if err != nil {
-		return 0,err
+		return 0, err
 	}
-	return distance,nil
+	return distance, nil
 }
