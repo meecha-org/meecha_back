@@ -53,9 +53,9 @@ locationInterval = setInterval(async () => {
         }
 
         // トーストを出す
-        toastr["info"](nUser["userid"] + "さんが近くにいます", "通知")
+        toastr["info"](nUser["name"] + "さんが近くにいます", "通知")
 
-        console.log(nUser["userid"] + "さんが近くにいます");
+        console.log(nUser["name"] + "さんが近くにいます");
 
         // 近くにいるフレンド表示
         NewPin(nUser["userid"], GetIcon(nUser["userid"]), nUser["latitude"], nUser["longitude"]);
