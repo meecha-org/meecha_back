@@ -120,3 +120,19 @@ func ExistCacheIgnores(args CacheIgnoreArgs) bool {
 
 	return false
 }
+
+// キャッシュから削除する
+func DeleteIgnoreCahce(userID, ignoreID string) error {
+	// バックグラウンドコンテキスト
+	ctx := context.Background()
+
+	// redis に保存
+	_, err := IgnoreRedisConn.ZRem(ctx, userID, ignoreID).Result()
+
+	// エラー処理
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
