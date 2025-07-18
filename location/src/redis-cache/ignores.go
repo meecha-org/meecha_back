@@ -63,12 +63,46 @@ func AddCacheIgnores(args CacheIgnoreArgs) error {
 
 // 近くの円を検索するエンドポイント
 type SearchIgnoreArgs struct {
-	UserID       string //自分のユーザーID
-	SearchRadius int64  //検索する半径
+	UserID       string  //自分のユーザーID
+	Latitude     float64 //緯度
+	Longitude    float64 //経度
+	SearchRadius int64   //検索する半径
 }
 
-func SearchCacheIgnores(args SearchIgnoreArgs) []IgnorePoint {
-	return nil
+type SearchIgnoreResult struct {
+	Latitude  float64 //緯度
+	Longitude float64 //経度
+	Dist      float64 //距離
+}
+
+func SearchCacheIgnores(args SearchIgnoreArgs) ([]SearchIgnoreResult, error) {
+	// ユーザーIDをもとに検索する
+	ignores, err := IgnoreRedisConn.GeoRadius(context.Background(), args.UserID, args.Latitude, args.Longitude, &redis.GeoRadiusQuery{
+		Radius:    float64(args.SearchRadius),
+		Unit:      "m",
+		WithCoord: true,
+		WithDist:  true,
+		Sort:      "ASC",
+	}).Result()
+
+	// エラー処理
+	if err != nil {
+		return nil, err
+	}
+
+	// データを整形して返す
+	returnData := make([]SearchIgnoreResult, len(ignores))
+
+	for i, ignore := range ignores {
+		// 検索結果を返す
+		returnData[i] = SearchIgnoreResult{
+			Latitude:  ignore.Latitude,
+			Longitude: ignore.Longitude,
+			Dist:      ignore.Dist,
+		}
+	}
+
+	return returnData, nil
 }
 
 // キャッシュに存在するか

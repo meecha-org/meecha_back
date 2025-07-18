@@ -5,7 +5,7 @@ import (
 	"errors"
 	"location/grpckit"
 	"location/models"
-	redisfriend "location/redis-friend"
+	rediscache "location/redis-cache"
 	"location/utils"
 	"slices"
 
@@ -42,8 +42,8 @@ type NearFriend struct {
 
 // 位置情報を更新して近くにいるフレンドを返す
 func UpdateLocation(args Location) (NearResponse, error) {
-	// redis に保存
-	err := GeoSave(args)
+	// 除外ポイントに入っているか判定する
+	isInIgnore,err := CheckIgnores(args)
 
 	// エラー処理
 	if err != nil {
@@ -51,11 +51,22 @@ func UpdateLocation(args Location) (NearResponse, error) {
 		return NearResponse{}, err
 	}
 
-	// 自身の除外ポイントを取得
-	models.GetIgnores(args.UserID)
+	// 除外ポイントに入っている場合は処理しない
+	if isInIgnore {
+		return NearResponse{}, nil
+	}
+
+	// redis に保存
+	err = GeoSave(args)
+
+	// エラー処理
+	if err != nil {
+		utils.Println(err)
+		return NearResponse{}, err
+	}
 
 	// フレンド情報を取得
-	cached, err := redisfriend.GetCacheFriend(args.UserID)
+	cached, err := rediscache.GetCacheFriend(args.UserID)
 
 	// エラー処理
 	if err != nil {
@@ -295,4 +306,81 @@ func GetUserSetDistance(uid string) (int64, error) {
 		return 0, err
 	}
 	return distance, nil
+}
+
+// 除外ポイントを判定する関数
+func CheckIgnores(args Location) (bool, error) {
+	// キャッシュに存在するか確認する
+	if !rediscache.ExistCacheIgnores(rediscache.CacheIgnoreArgs{
+		UserID: args.UserID,
+	}) {
+		// 存在しない時
+		// データベースから除外ポイントを取得
+		ignores, err := models.GetIgnores(args.UserID)
+
+		// エラー処理
+		if err != nil {
+			return false, err
+		}
+
+		addData := make([]rediscache.IgnorePoint, 0)
+		for _, ignore := range ignores {
+			// uuid を生成する
+			pointId, _ := utils.Genid()
+
+			// ユーザーの除外ポイントを追加
+			addData = append(addData, rediscache.IgnorePoint{
+				Longitude: ignore.Longitude,
+				Latitude:  ignore.Latitude,
+				PointId:   pointId,
+				Size:      ignore.Size,
+			})
+		}
+
+		// redis に保存
+		err = rediscache.AddCacheIgnores(rediscache.CacheIgnoreArgs{
+			UserID: args.UserID,
+			Datas:  addData,
+		})
+
+		// エラー処理
+		if err != nil {
+			return false, err
+		}
+	}
+
+	// キャッシュから近くのデータを判定する
+	points, err := rediscache.SearchCacheIgnores(rediscache.SearchIgnoreArgs{
+		UserID:       args.UserID,
+		SearchRadius: 5000, // 最大の円のサイズを設定
+	})
+
+	// エラー処理
+	if err != nil {
+		return false, err
+	}
+
+	// 除外ポイントがない場合
+	if len(points) == 0 {
+		return false, nil
+	}
+
+	// 除外ポイントを判定する
+	for _, point := range points {
+		// モデルから除外ポイントを取得
+		dbIgnorePoint, err := models.GetIgnoreByLatitudeLongitude(args.UserID, point.Latitude, point.Longitude)
+
+		// エラー処理
+		if err != nil {
+			return false, err
+		}
+
+		// 円の中心からの距離が設定より小さい場合
+		if int64(point.Dist) < dbIgnorePoint.Size {
+			// 円の中に入っている場合
+			return true, nil
+		}
+	}
+
+	return false, nil
 }

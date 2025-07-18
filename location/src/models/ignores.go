@@ -1,14 +1,10 @@
 package models
 
-import (
-
-)
-
 type Ignores struct {
-	Uid       string      //送信者ID
-	Latitude  float64 
-	Longitude float64 
-	Size      int64  
+	Uid       string //送信者ID
+	Latitude  float64
+	Longitude float64
+	Size      int64
 }
 
 type IgnoresArgs struct {
@@ -17,18 +13,15 @@ type IgnoresArgs struct {
 	Size      int64   `json:"Size"`
 }
 
-
-
 // uidに関連する除外ポイントを削除
 func RemoveIgnores(uid string) error {
 	return dbconn.Where(&Ignores{
-		Uid:	uid,
+		Uid: uid,
 	}).Unscoped().Delete(&Ignores{}).Error
 }
 
-
 // uidに関連する除外ポイントを登録
-func SaveIgnores(uid string,ignores []IgnoresArgs) error {
+func SaveIgnores(uid string, ignores []IgnoresArgs) error {
 	var ignoresRecords []Ignores
 
 	for _, ignores := range ignores {
@@ -44,21 +37,40 @@ func SaveIgnores(uid string,ignores []IgnoresArgs) error {
 }
 
 // uidに関連する除外ポイントを削除
-func GetIgnores(uid string) ([]Ignores,error) {
+func GetIgnores(uid string) ([]Ignores, error) {
 
 	//除外ポイント
 	ignores := []Ignores{}
 
 	// リクエスト取得
 	result := dbconn.Where(&Ignores{
-		Uid:	uid,
+		Uid: uid,
 	}).Find(&ignores)
 
-		// エラー処理
+	// エラー処理
 	if result.Error != nil {
 		return []Ignores{}, result.Error
 	}
 
-	return ignores,nil
+	return ignores, nil
 }
 
+func GetIgnoreByLatitudeLongitude(uid string, latitude float64, longitude float64) (IgnoresArgs, error) {
+
+	//除外ポイント
+	ignores := IgnoresArgs{}
+
+	// リクエスト取得
+	result := dbconn.Where(&Ignores{
+		Uid:       uid,
+		Latitude:  latitude,
+		Longitude: longitude,
+	}).Find(&ignores)
+
+	// エラー処理
+	if result.Error != nil {
+		return IgnoresArgs{}, result.Error
+	}
+
+	return ignores, nil
+}
