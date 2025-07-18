@@ -373,6 +373,18 @@ func CheckIgnores(args Location) (bool, error) {
 		// モデルから除外ポイントを取得
 		dbIgnorePoint, err := models.GetIgnoreFromPointId(args.UserID, point.IgnoreId)
 
+		// 見つからない場合キャッシュから削除
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			// キャッシュから削除
+			err = rediscache.DeleteIgnoreCahce(args.UserID, point.IgnoreId)
+
+			// エラー処理
+			if err != nil {
+				return false, err
+			}
+			continue
+		}
+
 		// エラー処理
 		if err != nil {
 			return false, err
