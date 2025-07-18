@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"location/grpckit"
+	"location/logger"
 	"location/models"
 	rediscache "location/redis-cache"
 	"location/utils"
@@ -53,6 +54,7 @@ func UpdateLocation(args Location) (NearResponse, error) {
 
 	// 除外ポイントに入っている場合は処理しない
 	if isInIgnore {
+		logger.Println("ユーザーID: ", args.UserID, " は除外ポイントに入っています")
 		return NearResponse{}, nil
 	}
 
