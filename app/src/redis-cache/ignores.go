@@ -5,8 +5,6 @@ import (
 	"new-meecha/logger"
 
 	// "new-meecha/utils"
-
-	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -15,6 +13,7 @@ type CacheIgnoreArgs struct {
 	Datas  []IgnorePoint //除外ポイント一覧
 }
 type IgnorePoint struct {
+	PointId   string  //uuid
 	Size      int64   //半径
 	Latitude  float64 //緯度
 	Longitude float64 //経度
@@ -36,19 +35,11 @@ func AddCacheIgnores(args CacheIgnoreArgs) error {
 
 	// 除外ポイントのデータを回す
 	for _, point := range args.Datas {
-		// uuidを生成する
-		uuid_obj, err := uuid.NewRandom()
-
-		//エラー処理
-		if err != nil {
-			return err
-		}
-
 		// ユーザーごとに redis に保存
 		result := IgnoreRedisConn.GeoAdd(ctx, args.UserID, &redis.GeoLocation{
-			Name:      uuid_obj.String(),
-			Longitude: point.Latitude,
-			Latitude:  point.Longitude,
+			Name:      point.PointId,
+			Longitude: point.Longitude,
+			Latitude:  point.Latitude,
 		})
 
 		// エラー処理

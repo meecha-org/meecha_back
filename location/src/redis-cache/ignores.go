@@ -5,8 +5,6 @@ import (
 	"location/logger"
 
 	// "new-meecha/utils"
-
-	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -26,16 +24,9 @@ func AddCacheIgnores(args CacheIgnoreArgs) error {
 	// バックグラウンドコンテキスト
 	ctx := context.Background()
 
-	// uuidを生成する
-	uuid_obj, err := uuid.NewRandom()
-
-	//エラー処理
-	if err != nil {
-		return err
-	}
 
 	// 全てのキャッシュを削除する
-	err = IgnoreRedisConn.Del(ctx, args.UserID).Err()
+	err := IgnoreRedisConn.Del(ctx, args.UserID).Err()
 
 	// エラー処理
 	if err != nil {
@@ -47,9 +38,9 @@ func AddCacheIgnores(args CacheIgnoreArgs) error {
 	for _, point := range args.Datas {
 		// ユーザーごとに redis に保存
 		result := IgnoreRedisConn.GeoAdd(ctx, args.UserID, &redis.GeoLocation{
-			Name:      uuid_obj.String(),
-			Longitude: point.Latitude,
-			Latitude:  point.Longitude,
+			Name:      point.PointId,
+			Longitude: point.Longitude,
+			Latitude:  point.Latitude,
 		})
 
 		// エラー処理
@@ -73,11 +64,12 @@ type SearchIgnoreResult struct {
 	Latitude  float64 //緯度
 	Longitude float64 //経度
 	Dist      float64 //距離
+	IgnoreId  string  //除外ポイントID
 }
 
 func SearchCacheIgnores(args SearchIgnoreArgs) ([]SearchIgnoreResult, error) {
 	// ユーザーIDをもとに検索する
-	ignores, err := IgnoreRedisConn.GeoRadius(context.Background(), args.UserID, args.Latitude, args.Longitude, &redis.GeoRadiusQuery{
+	ignores, err := IgnoreRedisConn.GeoRadius(context.Background(), args.UserID, args.Longitude, args.Latitude, &redis.GeoRadiusQuery{
 		Radius:    float64(args.SearchRadius),
 		Unit:      "m",
 		WithCoord: true,
@@ -90,6 +82,8 @@ func SearchCacheIgnores(args SearchIgnoreArgs) ([]SearchIgnoreResult, error) {
 		return nil, err
 	}
 
+	logger.Println("redis ignores", ignores)
+
 	// データを整形して返す
 	returnData := make([]SearchIgnoreResult, len(ignores))
 
@@ -99,6 +93,7 @@ func SearchCacheIgnores(args SearchIgnoreArgs) ([]SearchIgnoreResult, error) {
 			Latitude:  ignore.Latitude,
 			Longitude: ignore.Longitude,
 			Dist:      ignore.Dist,
+			IgnoreId:  ignore.Name,
 		}
 	}
 

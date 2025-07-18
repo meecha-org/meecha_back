@@ -327,14 +327,11 @@ func CheckIgnores(args Location) (bool, error) {
 
 		addData := make([]rediscache.IgnorePoint, 0)
 		for _, ignore := range ignores {
-			// uuid を生成する
-			pointId, _ := utils.Genid()
-
 			// ユーザーの除外ポイントを追加
 			addData = append(addData, rediscache.IgnorePoint{
 				Longitude: ignore.Longitude,
 				Latitude:  ignore.Latitude,
-				PointId:   pointId,
+				PointId:   ignore.IgnoreId,
 				Size:      ignore.Size,
 			})
 		}
@@ -355,12 +352,16 @@ func CheckIgnores(args Location) (bool, error) {
 	points, err := rediscache.SearchCacheIgnores(rediscache.SearchIgnoreArgs{
 		UserID:       args.UserID,
 		SearchRadius: 5000, // 最大の円のサイズを設定
+		Latitude:     args.Latitude,
+		Longitude:    args.Longitude,
 	})
 
 	// エラー処理
 	if err != nil {
 		return false, err
 	}
+
+	logger.Println("points", points)
 
 	// 除外ポイントがない場合
 	if len(points) == 0 {
@@ -370,7 +371,7 @@ func CheckIgnores(args Location) (bool, error) {
 	// 除外ポイントを判定する
 	for _, point := range points {
 		// モデルから除外ポイントを取得
-		dbIgnorePoint, err := models.GetIgnoreByLatitudeLongitude(args.UserID, point.Latitude, point.Longitude)
+		dbIgnorePoint, err := models.GetIgnoreFromPointId(args.UserID, point.IgnoreId)
 
 		// エラー処理
 		if err != nil {
