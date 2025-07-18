@@ -2,7 +2,8 @@ package rediscache
 
 import (
 	"context"
-	"new-meecha/utils"
+	"new-meecha/logger"
+	"new-meecha/models"
 	"time"
 
 	// "new-meecha/utils"
@@ -11,11 +12,11 @@ import (
 )
 
 type CacheFriendArgs struct {
-	UserID string //相手のユーザーID
-	Data FriendCache //フレンドのID一覧
+	UserID string      //相手のユーザーID
+	Data   FriendCache //フレンドのID一覧
 }
 type FriendCache struct {
-	FriendIds []string	//フレンドのID一覧
+	FriendIds []string //フレンドのID一覧
 }
 
 // キャッシュを追加
@@ -25,15 +26,15 @@ func AddCacheFriend(args CacheFriendArgs) error {
 
 	// msgpack に変換
 	idsbin, err := msgpack.Marshal(args.Data)
-    if err != nil {
-        return err
-    }
+	if err != nil {
+		return err
+	}
 
-	utils.Println(args.UserID)
-	utils.Println(args.Data)
+	logger.Println(args.UserID)
+	logger.Println(args.Data)
 
 	// redis に保存
-	err = conn.Set(ctx,args.UserID,idsbin,time.Second * 300).Err()
+	err = friendConn.Set(ctx, args.UserID, idsbin, time.Second*300).Err()
 
 	// エラー処理
 	if err != nil {
@@ -44,16 +45,44 @@ func AddCacheFriend(args CacheFriendArgs) error {
 }
 
 // キャッシュから取得
-func GetCacheFriend(userid string) (FriendCache,error) {
+func GetCacheFriend(userid string) (FriendCache, error) {
+	// 存在しない場合
+	if (!ExistCacheFriend(CacheFriendArgs{
+		UserID: userid,
+	})) {
+		logger.Println("キャッシュがないのでDBから取得")
+
+		// db から取得
+		friendids, err := models.GetFriendList(userid)
+
+		// エラー処理
+		if err != nil {
+			return FriendCache{}, err
+		}
+
+		// キャッシュに追加
+		err = AddCacheFriend(CacheFriendArgs{
+			UserID: userid,
+			Data: FriendCache{
+				FriendIds: friendids,
+			},
+		})
+
+		// エラー処理
+		if err != nil {
+			return FriendCache{}, err
+		}
+	}
+
 	// バックグラウンドコンテキスト
 	ctx := context.Background()
 
-	// redis に保存	
-	result,err := conn.Get(ctx,userid).Result()	
+	// redis に保存
+	result, err := friendConn.Get(ctx, userid).Result()
 
 	// エラー処理
 	if err != nil {
-		return FriendCache{},err
+		return FriendCache{}, err
 	}
 
 	// 返すIDS
@@ -61,12 +90,11 @@ func GetCacheFriend(userid string) (FriendCache,error) {
 
 	// msgpack から変換
 	if err := msgpack.Unmarshal([]byte(result), &returnIds); err != nil {
-		return FriendCache{},err
+		return FriendCache{}, err
 	}
 
 	return returnIds, nil
 }
-
 
 // キャッシュを削除
 func DelCacheFriend(args CacheFriendArgs) error {
@@ -74,7 +102,7 @@ func DelCacheFriend(args CacheFriendArgs) error {
 	ctx := context.Background()
 
 	// redis に保存
-	_,err := conn.Del(ctx,args.UserID).Result()
+	_, err := friendConn.Del(ctx, args.UserID).Result()
 
 	// エラー処理
 	if err != nil {
@@ -90,12 +118,17 @@ func ExistCacheFriend(args CacheFriendArgs) bool {
 	ctx := context.Background()
 
 	// redis に保存
-	_,err := conn.Exists(ctx,args.UserID).Result()
+	count, err := friendConn.Exists(ctx, args.UserID).Result()
 
 	// エラー処理
 	if err != nil {
 		return false
 	}
 
-	return true
+	// 0以上なら存在する
+	if count > 0 {
+		return true
+	}
+
+	return false
 }

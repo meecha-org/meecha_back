@@ -3,6 +3,7 @@ package services
 import (
 	"errors"
 	"new-meecha/models"
+	rediscache "new-meecha/redis-cache"
 	"slices"
 )
 
@@ -28,7 +29,25 @@ func UpdateIgnores(myid string,args []models.IgnoresArgs) error {
 		}
 	}
 
-	return nil
+	// キャッシュに追加できるように変更
+	addDatas := []rediscache.IgnorePoint{}
+
+	for _, arg := range args {
+		// データを整形して追加
+		addDatas = append(addDatas, rediscache.IgnorePoint{
+			Size:      arg.Size,
+			Latitude:  arg.Latitude,
+			Longitude: arg.Longitude,
+		})
+	}
+
+	// キャッシュを更新する
+	err = rediscache.AddCacheIgnores(rediscache.CacheIgnoreArgs{
+		UserID: myid,
+		Datas:  addDatas,
+	})
+
+	return err
 }
 
 

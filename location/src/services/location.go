@@ -51,6 +51,9 @@ func UpdateLocation(args Location) (NearResponse, error) {
 		return NearResponse{}, err
 	}
 
+	// 自身の除外ポイントを取得
+	models.GetIgnores(args.UserID)
+
 	// フレンド情報を取得
 	cached, err := redisfriend.GetCacheFriend(args.UserID)
 
