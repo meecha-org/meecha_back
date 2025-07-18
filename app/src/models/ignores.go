@@ -1,8 +1,8 @@
 package models
 
 type Ignores struct {
-	Uid       string //送信者ID
-	IgnoreId  string //受信者ID
+	Uid       string	`gorm:"primary_key` //送信者ID
+	IgnoreId  string	`gorm:"primary_key` //受信者ID
 	Latitude  float64
 	Longitude float64
 	Size      int64
