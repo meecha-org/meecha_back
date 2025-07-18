@@ -1,4 +1,4 @@
-package redisfriend
+package rediscache
 
 import (
 	"location/models"
@@ -9,7 +9,8 @@ import (
 )
 
 var (
-	conn *redis.Client = nil
+	friendConn      *redis.Client = nil
+	IgnoreRedisConn *redis.Client = nil
 )
 
 func Init() {
@@ -25,7 +26,18 @@ func Init() {
 	})
 
 	// グローバル変数に格納
-	conn = redisConn
+	friendConn = redisConn
+
+	// redis に接続
+	IgnoreConn := redis.NewClient(&redis.Options{
+		Addr:     os.Getenv("REDIS_HOST"),
+		Password: os.Getenv("REDIS_PASSWORD"),
+		DB:       1,
+		PoolSize: 1000,
+	})
+
+	// グローバル変数に格納
+	IgnoreRedisConn = IgnoreConn
 
 	utils.Println("redis connected")
 }

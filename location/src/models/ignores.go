@@ -57,3 +57,12 @@ func GetIgnores(uid string) ([]Ignores, error) {
 
 	return ignores, nil
 }
+
+func GetIgnoreFromPointId(uid string, pointId string) (Ignores, error) {
+	var ignores Ignores
+	result := dbconn.Where(&Ignores{
+		Uid:       uid,
+		IgnoreId:  pointId,
+	}).First(&ignores)
+	return ignores, result.Error
+}

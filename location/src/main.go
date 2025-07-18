@@ -4,7 +4,8 @@ import (
 	"location/controllers"
 	"location/grpckit"
 	"location/middlewares"
-	redisfriend "location/redis-friend"
+	rediscache "location/redis-cache"
+
 	"location/services"
 	"net/http"
 
@@ -14,7 +15,7 @@ import (
 
 func main() {
 	// redis 初期化
-	redisfriend.Init()
+	rediscache.Init()
 
 	// サービス初期化
 	services.Init()
@@ -24,7 +25,7 @@ func main() {
 
 	// GRPC 初期化
 	grpckit.Init()
-	
+
 	// ルーター
 	router := echo.New()
 
@@ -39,7 +40,7 @@ func main() {
 	}, middlewares.RequireAuth)
 
 	// 位置情報をポストする関数
-	router.POST("/update",controllers.UpdateLocation,middlewares.RequireAuth)
+	router.POST("/update", controllers.UpdateLocation, middlewares.RequireAuth)
 
 	router.Logger.Fatal(router.Start(":8090"))
 }
