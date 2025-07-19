@@ -16,6 +16,25 @@ type IgnoresArgs struct {
 
 // 除外ポイントの作成、更新
 func UpdateIgnores(myid string, args []IgnoresArgs) error {
+	// 0の時データの削除だけ行う
+	if len(args) == 0 {
+		//myidに関連する除外ポイントを削除
+		err := models.RemoveIgnores(myid)
+		if err != nil {
+			return err
+		}
+
+		// キャッシュから削除する
+		err = rediscache.DeleteAllIgnoresFromCache(myid)
+
+		// エラー処理
+		if err != nil {
+			return err
+		}
+
+		return nil
+	}
+
 	for _, arg := range args {
 		if !slices.Contains(ValidationList, arg.Size) {
 			return errors.New("InvalidDistance")
@@ -34,7 +53,7 @@ func UpdateIgnores(myid string, args []IgnoresArgs) error {
 	// 引数を回す
 	for _, arg := range args {
 		// UUIDを生成する
-		uid,_ := utils.Genid()
+		uid, _ := utils.Genid()
 
 		//送られてきたポイントを登録する
 		addDatas = append(addDatas, models.IgnoresArgs{
@@ -64,6 +83,14 @@ func UpdateIgnores(myid string, args []IgnoresArgs) error {
 			Longitude: arg.Longitude,
 			PointId:   arg.IgnoreId,
 		})
+	}
+
+	// キャッシュから削除する
+	err = rediscache.DeleteAllIgnoresFromCache(myid)
+
+	// エラー処理
+	if err != nil {
+		return err
 	}
 
 	// キャッシュを更新する
