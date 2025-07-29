@@ -33,6 +33,13 @@ func main() {
 	router.Use(middleware.Logger())
 	// router.Use(middlewares.PocketAuth())
 
+	// ヘルスチェック用 エンドポイント
+	router.GET("/health", func(ctx echo.Context) error {
+		return ctx.JSON(http.StatusOK, echo.Map{
+			"result": "ok",
+		})
+	})
+
 	router.GET("/", func(ctx echo.Context) error {
 		return ctx.JSON(http.StatusOK, echo.Map{
 			"result": "hello world",
