@@ -5,16 +5,16 @@ on:
     branches: [ "test-env" ]
 
 jobs:
-  build-static:
+  build-update-config:
     runs-on: ubuntu-latest
     timeout-minutes: 3
 
-  permissions:
-    contents: read
-    packages: write
+    permissions:
+      contents: read
+      packages: write
 
-  steps:
-    - name: chage docker image
-      uses: mikefarah/yq@master
-      with:
-        cmd: IMAGE_TAG=${{ github.sha }} yq eval '.dockerImageTag = env(IMAGE_TAG)' -i ${{ env.WORK_DIR }}/infrastructure/kubernetes/mychart/test-values.yaml
+    steps:
+      - name: chage docker image
+        uses: mikefarah/yq@master
+        with:
+          cmd: IMAGE_TAG=${{ github.sha }} yq eval '.dockerImageTag = env(IMAGE_TAG)' -i ${{ env.WORK_DIR }}/infrastructure/kubernetes/mychart/test-values.yaml
