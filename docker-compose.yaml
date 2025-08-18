@@ -15,7 +15,7 @@ services:
     # 認証用コンテナ
     auth:
         hostname: auth
-        image: mattuu0/authbase-auth:0.2.2
+        image: mattuu0/authbase-auth:0.2.4
         env_file:
             - ./openssl/jwtKeys/private.env
             - ./config/auth.env
@@ -24,8 +24,8 @@ services:
             - ./auth/icons:/assets/icons
         restart: always
         depends_on:
-            mysql:
-                condition: service_healthy
+            migrate:
+                condition: service_completed_successfully
     
     # アプリコンテナ
     app:
@@ -62,8 +62,6 @@ services:
             - ./location/src:/root/src
         restart: always
         depends_on:
-            mysql:
-                condition: service_healthy
             auth:
                 condition: service_started
             app:
@@ -88,6 +86,14 @@ services:
             interval: 5s
             timeout: 10s
             retries: 5
+    
+    # 認証用マイグレーション用コンテナ
+    migrate:
+        image: mattuu0/authbase-auth:0.2.4
+        env_file:
+            - ./config/auth.env
+        command: ["/auth","migrate","-r"]
+
     redis:
         hostname: redis
         image: redis:latest
