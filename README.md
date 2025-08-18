@@ -32,30 +32,17 @@ Docker を使用して簡単に開発環境を構築できます。
     git clone https://github.com/meecha-org/meecha_back.git
     cd meecha_back
     ```
-2.  `config` フォルダ内の `*env_template` をコピーして、各種 `.env` ファイルを作成します。
-    ```bash
-    cp config/.env_template config/.env
-    # 必要に応じて、他のenv_templateも同様にコピーしてください
-    ```
-3.  必要な初期設定やマイグレーションを実行します（Taskfile を使用）。
+2.  必要な初期設定やマイグレーションを実行します（Taskfile を使用）。
     ```bash
     task setup
     ```
-4. データベースコンテナが初期化済みであることを確認してください 
-    ```
-    task dbshell
-    ```
-    を実行してデータベースに入ることができれば成功です
-5. コンテナを再起動してください
-    ```
-    task restart
-    ```
-6.  管理ユーザーを作成します。ブラウザで以下のURLにアクセスしてください。
+3.  管理ユーザーを作成します。ブラウザで以下のURLにアクセスしてください。
+    管理者のパスワードは ./config/auth.env に記載されています
     ```
     https://localhost:8350/auth/_/
     ```
-7.  Google ログインの設定を行ってください。
-8.  ログインを試すには、以下のURLにアクセスしてください。
+4.  Google ログインの設定を行ってください。
+5.  ログインを試すには、以下のURLにアクセスしてください。
     ```
     https://localhost:8350/statics/
     ```
