@@ -77,19 +77,19 @@ def create_auth_env():
     auth_env_template = f"""
 DiscordClientID = {discord_client_id}
 DiscordClientSecret = {discord_client_secret}
-DiscordCallback = https://localhost:8947/auth/oauth/discord/callback
+DiscordCallback = https://localhost:8350/auth/oauth/discord/callback
 
 GoogleClientID = {google_client_id}
 GoogleClientSecret = {google_client_secret}
-GoogleCallback = https://localhost:8947/auth/oauth/google/callback
+GoogleCallback = https://localhost:8350/auth/oauth/google/callback
 
 GithubClientID = {github_client_id}
 GithubClientSecret = {github_client_secret}
-GithubCallback = https://localhost:8947/auth/oauth/github/callback
+GithubCallback = https://localhost:8350/auth/oauth/github/callback
 
 MicrosoftClientID = {microsoft_client_id}
 MicrosoftClientSecret = {microsoft_client_secret}
-MicrosoftCallback = https://localhost:8947/auth/oauth/microsoftonline/callback
+MicrosoftCallback = https://localhost:8350/auth/oauth/microsoftonline/callback
 
 AdminEmail = "{admin_email}"
 AdminPassword = "{admin_password}"
