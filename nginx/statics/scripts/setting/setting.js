@@ -10,8 +10,18 @@ logout_link.addEventListener("click", async function (evt) {
     // イベントキャンセル
     evt.preventDefault();
 
-    // ログアウト
-    await auth.Logout(true);
+    try {
+        // ログアウト
+        await auth.Logout(true);
+
+    } catch (ex) {
+        console.error(ex);
+        alert("ログアウトに失敗しました");
+        return;
+    }
+
+    // リロード
+    window.location.reload();
 });
 
 // ユーザー情報
