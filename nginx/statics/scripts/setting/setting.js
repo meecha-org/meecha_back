@@ -11,7 +11,7 @@ logout_link.addEventListener("click", async function (evt) {
     evt.preventDefault();
 
     // ログアウト
-    await Logout(true);
+    await auth.Logout(true);
 });
 
 // ユーザー情報
