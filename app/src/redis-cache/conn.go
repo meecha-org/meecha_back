@@ -1,6 +1,7 @@
 package rediscache
 
 import (
+	"context"
 	"new-meecha/logger"
 	"new-meecha/models"
 	"os"
@@ -33,6 +34,12 @@ func getRedis(db int) *redis.Client {
 			Password: os.Getenv("REDIS_PASSWORD"),
 			DB:       db,
 			PoolSize: 1000,
+			OnConnect: func(ctx context.Context, cn *redis.Conn) error {
+				// redis に接続
+				err := cn.Select(ctx,db).Err()
+
+				return err
+			},
 		})
 	}
 
