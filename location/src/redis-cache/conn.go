@@ -1,8 +1,8 @@
 package rediscache
 
 import (
+	"location/logger"
 	"location/models"
-	"location/utils"
 	"os"
 
 	"github.com/redis/go-redis/v9"
@@ -13,31 +13,45 @@ var (
 	IgnoreRedisConn *redis.Client = nil
 )
 
+func getRedis(db int) *redis.Client {
+	if os.Getenv("REDIS_TYPE") == "redis" {
+		// 通常のredisの場合
+		// redis に接続
+		return redis.NewClient(&redis.Options{
+			Addr:     os.Getenv("REDIS_HOST"),
+			Password: os.Getenv("REDIS_PASSWORD"),
+			DB:       0,
+			PoolSize: 1000,
+		})
+	}
+
+	if os.Getenv("REDIS_TYPE") == "sentinel" {
+		// sentinel の場合
+		// sentinel に接続
+		return redis.NewFailoverClient(&redis.FailoverOptions{
+			SentinelAddrs:     []string{os.Getenv("REDIS_HOST")},
+			Password: os.Getenv("REDIS_PASSWORD"),
+			DB:       db,
+			PoolSize: 1000,
+		})
+	}
+
+	// panic 起こす
+	panic("redis type error")
+}
+
 func Init() {
 	// モデル初期化
 	models.Init()
 
-	// redis に接続
-	redisConn := redis.NewClient(&redis.Options{
-		Addr:     os.Getenv("REDIS_HOST"),
-		Password: os.Getenv("REDIS_PASSWORD"),
-		DB:       0,
-		PoolSize: 1000,
-	})
-
 	// グローバル変数に格納
-	friendConn = redisConn
+	friendConn = getRedis(0)
 
 	// redis に接続
-	IgnoreConn := redis.NewClient(&redis.Options{
-		Addr:     os.Getenv("REDIS_HOST"),
-		Password: os.Getenv("REDIS_PASSWORD"),
-		DB:       1,
-		PoolSize: 1000,
-	})
+	IgnoreConn := getRedis(1)
 
 	// グローバル変数に格納
 	IgnoreRedisConn = IgnoreConn
 
-	utils.Println("redis connected")
+	logger.Println("redis connected")
 }
