@@ -127,6 +127,7 @@ def main():
     app_env_template = f"""
 REDIS_TYPE = "redis"
 REDIS_HOST = "redis:6379"
+REDIS_MASTER_NAME = "myMaster"
 REDIS_PASSWORD = ""
 SessionSecret = "{session_secret_key}"
 GRPC_SERVER = auth:9000
@@ -138,6 +139,7 @@ DATABASE_DSN = "main:main@tcp(db:3306)/maindb?charset=utf8mb4&parseTime=True&loc
 
     location_env_template = f"""
 REDIS_TYPE = "redis"
+REDIS_MASTER_NAME = "myMaster"
 REDIS_HOST = "redis:6379"
 REDIS_PASSWORD = ""
 DATABASE_DSN = "main:main@tcp(db:3306)/maindb?charset=utf8mb4&parseTime=True&loc=Local"

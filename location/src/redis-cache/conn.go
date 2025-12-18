@@ -31,6 +31,7 @@ func getRedis(db int) *redis.Client {
 		return redis.NewFailoverClient(&redis.FailoverOptions{
 			SentinelAddrs:     []string{os.Getenv("REDIS_HOST")},
 			Password: os.Getenv("REDIS_PASSWORD"),
+			MasterName: os.Getenv("REDIS_MASTER_NAME"),
 			DB:       db,
 			PoolSize: 1000,
 		})
