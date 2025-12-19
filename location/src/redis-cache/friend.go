@@ -34,7 +34,7 @@ func AddCacheFriend(args CacheFriendArgs) error {
 	utils.Println(args.Data)
 
 	// redis に保存
-	err = friendConn.Set(ctx, args.UserID, idsbin, time.Second*300).Err()
+	err = friendConn.Set(ctx, args.UserID, idsbin, time.Second*300)
 
 	// エラー処理
 	if err != nil {
@@ -78,7 +78,7 @@ func GetCacheFriend(userid string) (FriendCache, error) {
 	ctx := context.Background()
 
 	// redis に保存
-	result, err := friendConn.Get(ctx, userid).Result()
+	result, err := friendConn.Get(ctx, userid)
 
 	// エラー処理
 	if err != nil {
@@ -102,7 +102,7 @@ func DelCacheFriend(args CacheFriendArgs) error {
 	ctx := context.Background()
 
 	// redis に保存
-	_, err := friendConn.Del(ctx, args.UserID).Result()
+	err := friendConn.Del(ctx, args.UserID)
 
 	// エラー処理
 	if err != nil {
@@ -118,7 +118,7 @@ func ExistCacheFriend(args CacheFriendArgs) bool {
 	ctx := context.Background()
 
 	// redis に保存
-	count, err := friendConn.Exists(ctx, args.UserID).Result()
+	count, err := friendConn.Exists(ctx, args.UserID)
 
 	// エラー処理
 	if err != nil {
