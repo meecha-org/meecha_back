@@ -26,7 +26,7 @@ func AddCacheIgnores(args CacheIgnoreArgs) error {
 
 
 	// 全てのキャッシュを削除する
-	err := IgnoreRedisConn.Del(ctx, args.UserID).Err()
+	err := IgnoreRedisConn.Del(ctx, args.UserID)
 
 	// エラー処理
 	if err != nil {
@@ -37,15 +37,15 @@ func AddCacheIgnores(args CacheIgnoreArgs) error {
 	// 除外ポイントのデータを回す
 	for _, point := range args.Datas {
 		// ユーザーごとに redis に保存
-		result := IgnoreRedisConn.GeoAdd(ctx, args.UserID, &redis.GeoLocation{
+		_,err := IgnoreRedisConn.GeoAdd(ctx, args.UserID, &redis.GeoLocation{
 			Name:      point.PointId,
 			Longitude: point.Longitude,
 			Latitude:  point.Latitude,
 		})
 
 		// エラー処理
-		if result.Err() != nil {
-			return result.Err()
+		if err != nil {
+			return err
 		}
 	}
 
@@ -75,7 +75,7 @@ func SearchCacheIgnores(args SearchIgnoreArgs) ([]SearchIgnoreResult, error) {
 		WithCoord: true,
 		WithDist:  true,
 		Sort:      "ASC",
-	}).Result()
+	})
 
 	// エラー処理
 	if err != nil {
@@ -106,7 +106,7 @@ func ExistCacheIgnores(args CacheIgnoreArgs) bool {
 	ctx := context.Background()
 
 	// redis に保存
-	count, err := IgnoreRedisConn.Exists(ctx, args.UserID).Result()
+	count, err := IgnoreRedisConn.Exists(ctx, args.UserID)
 
 	// エラー処理
 	if err != nil {
@@ -127,7 +127,7 @@ func DeleteIgnoreCahce(userID, ignoreID string) error {
 	ctx := context.Background()
 
 	// redis に保存
-	_, err := IgnoreRedisConn.ZRem(ctx, userID, ignoreID).Result()
+	_, err := IgnoreRedisConn.ZRem(ctx, userID, ignoreID)
 
 	// エラー処理
 	if err != nil {
