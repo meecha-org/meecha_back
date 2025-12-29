@@ -102,7 +102,7 @@ func getRedis(db int) *RedisConn {
 		rconn := redis.NewClient(&redis.Options{
 			Addr:     os.Getenv("REDIS_HOST"),
 			Password: os.Getenv("REDIS_PASSWORD"),
-			DB:       0,
+			DB:       db,
 			PoolSize: 1000,
 		})
 

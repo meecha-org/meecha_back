@@ -102,7 +102,7 @@ func getRedis(db int) *RedisConn {
 		rconn := redis.NewClient(&redis.Options{
 			Addr:     os.Getenv("REDIS_HOST"),
 			Password: os.Getenv("REDIS_PASSWORD"),
-			DB:       0,
+			DB:       db,
 			PoolSize: 1000,
 		})
 
@@ -114,13 +114,13 @@ func getRedis(db int) *RedisConn {
 	if os.Getenv("REDIS_TYPE") == "sentinel" {
 		// sentinel の場合
 		// sentinel に接続
-		clusterConn := redis.NewFailoverClient(&redis.FailoverOptions{
+		clusterConn := redis.NewFailoverClusterClient(&redis.FailoverOptions{
 			MasterName:     os.Getenv("REDIS_MASTER_NAME"),
 			SentinelAddrs:  []string{os.Getenv("REDIS_HOST")},
 			Password:      	os.Getenv("REDIS_PASSWORD"),
-			DB:             db,
+			// DB:             db,
 			PoolSize:       1000,
-			RouteRandomly:  false,
+			RouteRandomly:  true,
 			// 耐障害性のための設定
 			MaxRetries:      3,
 			MinRetryBackoff: time.Millisecond * 100,
@@ -129,10 +129,14 @@ func getRedis(db int) *RedisConn {
 			DialTimeout:  time.Second * 5,
 			ReadTimeout:  time.Second * 3,
 			WriteTimeout: time.Second * 3,
+			OnConnect: func(ctx context.Context, cn *redis.Conn) error {
+				err := cn.Select(ctx, db).Err()
+				return err
+			},
 		})
 
 		return &RedisConn{
-			Conn: clusterConn,
+			ClusterConn: clusterConn,
 		}
 	}
 
@@ -155,3 +159,4 @@ func Init() {
 
 	logger.Println("redis connected")
 }
+
